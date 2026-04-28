@@ -9,6 +9,8 @@ import {
   Plus,
   HelpCircle,
   Network,
+  ChevronDownSquare,
+  ChevronUpSquare
 } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useFlowStore } from '../../stores/flowStore';
@@ -23,6 +25,11 @@ export function CanvasControls() {
   const toggleSettings = useSettingsStore((s) => s.toggleSettings);
   const [showHelp, setShowHelp] = useState(false);
   const arrangeTimerRef = useRef<number | null>(null);
+  const toggleCollapseSmart = useFlowStore((s) => s.toggleCollapseSmart);
+
+  const nodes = useFlowStore((s) => s.nodes);
+  const collapsedCount = nodes.filter((n) => n.data?.collapsed).length;
+  const mostlyCollapsed = collapsedCount > nodes.length / 2;
 
   useEffect(() => {
     return () => {
@@ -109,6 +116,13 @@ export function CanvasControls() {
           title="Toggle Minimap"
         >
           <Map size={18} />
+        </button>
+        <button  
+          onClick={toggleCollapseSmart}
+          className={btnClass}
+          title="Toggle Collapse All"
+        >
+          {mostlyCollapsed ? <ChevronUpSquare size={18} /> : <ChevronDownSquare size={18} />}        
         </button>
         <button onClick={toggleSettings} className={btnClass} title="Settings">
           <Settings size={18} />

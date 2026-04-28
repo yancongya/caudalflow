@@ -22,6 +22,7 @@ interface FlowState {
   setNodes: (nodes: ChatNode[]) => void;
   setEdges: (edges: TopicEdge[]) => void;
   getChildCount: (parentId: string) => number;
+  toggleCollapseSmart: () => void;
 }
 
 export const useFlowStore = create<FlowState>((set, get) => ({
@@ -91,4 +92,25 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   getChildCount: (parentId) => {
     return get().edges.filter((e) => e.source === parentId).length;
   },
+
+  toggleCollapseSmart: () => {
+  const nodes = get().nodes;
+
+  if (nodes.length === 0) return;
+
+  const collapsedCount = nodes.filter((n) => n.data?.collapsed).length;
+
+  const shouldCollapse = collapsedCount < nodes.length / 2;
+
+  set({
+    nodes: nodes.map((n) => ({
+      ...n,
+      data: {
+        ...n.data,
+        collapsed: shouldCollapse,
+      },
+    })),
+  });
+},
+  
 }));
