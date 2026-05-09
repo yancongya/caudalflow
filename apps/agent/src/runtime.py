@@ -11,7 +11,7 @@ from langgraph.graph.state import CompiledStateGraph
 RuntimeName = Literal["gemini-flash-deep", "gemini-flash-react", "noop"]
 
 NOOP_FALLBACK_MESSAGE = (
-    "Set GEMINI_API_KEY in agent/.env to enable the CaudalFlow Copilot agent. "
+    "Set GEMINI_API_KEY or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow Copilot agent. "
     "The frontend and runtime wiring are installed."
 )
 
@@ -54,6 +54,15 @@ def _build_noop(message: str) -> CompiledStateGraph:
 
 
 def _gemini_llm():
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            temperature=float(os.getenv("AGENT_TEMPERATURE", "0")),
+        )
+
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "stub"

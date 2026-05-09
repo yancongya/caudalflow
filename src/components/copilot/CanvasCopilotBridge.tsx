@@ -6,6 +6,7 @@ import { Eye, GitBranch, Merge, Plus, Sparkles } from 'lucide-react';
 import { useFlowStore } from '../../stores/flowStore';
 import { useChatStore } from '../../stores/chatStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
+import { buildCanvasAgentState } from './canvasAgentState';
 import { calculateBranchPosition, calculateMergePosition } from '../../utils/nodeLayout';
 import { getBranchSystemPrompt, getMergeSystemPrompt } from '../../utils/systemPrompts';
 import type { ChatNode } from '../../types/flow';
@@ -28,54 +29,6 @@ type MergePlanArgs = {
 
 function numberStyleValue(value: unknown, fallback: number) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-}
-
-function buildCanvasAgentState() {
-  const flow = useFlowStore.getState();
-  const chat = useChatStore.getState();
-  const workspace = useWorkspaceStore.getState().getActiveWorkspace();
-
-  return {
-    workspace: workspace
-      ? {
-          id: workspace.id,
-          name: workspace.name,
-          updatedAt: workspace.updatedAt,
-        }
-      : null,
-    nodes: flow.nodes.map((node) => {
-      const messages = chat.getMessages(node.id).filter((message) => message.role !== 'system');
-      const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
-      const lastAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
-
-      return {
-        id: node.id,
-        topic: node.data.topic,
-        label: node.data.label,
-        color: node.data.color,
-        parentNodeId: node.data.parentNodeId,
-        parentNodeIds: node.data.parentNodeIds,
-        branchText: node.data.branchText,
-        mergeAction: node.data.mergeAction,
-        collapsed: Boolean(node.data.collapsed),
-        minimized: Boolean(node.data.minimized),
-        position: node.position,
-        messageCount: messages.length,
-        lastUserMessage: lastUserMessage?.content ?? '',
-        lastAssistantMessage: lastAssistantMessage?.content ?? '',
-        messages: messages.slice(-8).map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-      };
-    }),
-    edges: flow.edges.map((edge) => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      label: edge.data?.label ?? '',
-    })),
-  };
 }
 
 function focusNode(nodeId: string, setCenter: ReturnType<typeof useReactFlow>['setCenter']) {

@@ -2,7 +2,7 @@
 
 CANVAS_STATE_SHAPE = """
 CANVAS STATE SHAPE:
-- workspace: { id, name, updatedAt } | null
+- activeWorkspace: { id, name, createdAt, updatedAt, description? } | null
 - nodes: Array<{
     id: string
     topic: string
@@ -14,13 +14,32 @@ CANVAS STATE SHAPE:
     mergeAction?: string
     collapsed: boolean
     minimized: boolean
+    maximized: boolean
+    selected: boolean
     position: { x: number, y: number }
+    width: number
+    height: number
     messageCount: number
     lastUserMessage: string
     lastAssistantMessage: string
-    messages: Array<{ role: "user" | "assistant", content: string }>
+    messages: Array<{ id, role: "user" | "assistant", content, timestamp, imageCount, hasImages }>
   }>
 - edges: Array<{ id, source, target, label }>
+- conversations: Record<nodeId, {
+    nodeId: string
+    isStreaming: boolean
+    messageCount: number
+    systemMessageCount: number
+    messages: Array<{ id, role: "user" | "assistant", content, timestamp, imageCount, hasImages }>
+  }>
+- selectedNodes: Array<node summary from nodes>
+- currentMessages: Array<{ sourceNodeId, sourceTopic, id, role, content, timestamp, imageCount, hasImages }>
+- mergeContext: null | {
+    ready: true
+    sourceNodeIds: string[]
+    sourceTopics: string[]
+    sources: Array<{ nodeId, topic, label?, lastUserMessage, lastAssistantMessage, messages }>
+  }
 """
 
 FRONTEND_TOOLS = """

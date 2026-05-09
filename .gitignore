@@ -35,3 +35,9 @@ Thumbs.db
 
 # Test / coverage
 coverage
+
+# Python / local agent runtime
+.venv/
+__pycache__/
+*.pyc
+.langgraph_api/
