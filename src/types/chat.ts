@@ -8,7 +8,9 @@ export interface ChatMessage {
   images?: {
     base64: string;
     mimeType: string;
-  }[];}
+  }[];
+  triggeredBy?: string;
+}
 
 export interface Conversation {
   nodeId: string;

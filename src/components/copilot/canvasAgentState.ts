@@ -1,5 +1,6 @@
 import { useChatStore } from '../../stores/chatStore';
 import { useFlowStore } from '../../stores/flowStore';
+import { useSettingsStore } from '../../stores/settingsStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 import type { ChatMessage, Conversation, MessageRole } from '../../types/chat';
 import type { ChatNode, TopicEdge } from '../../types/flow';
@@ -21,6 +22,7 @@ interface AgentMessage {
 }
 
 interface AgentNode {
+  index: number;
   id: string;
   topic: string;
   label?: string;
@@ -71,6 +73,20 @@ interface AgentMergeContext {
   sources: AgentMergeSource[];
 }
 
+interface NodeContext {
+  nodeId: string;
+  mode: 'root' | 'branch' | 'merge';
+  topic: string;
+  mergeAction?: string;
+}
+
+interface LLMConfig {
+  providerId: string;
+  model: string;
+  endpoint: string;
+  temperature: number;
+}
+
 export interface CanvasAgentState {
   activeWorkspace: Pick<WorkspaceMetadata, 'id' | 'name' | 'createdAt' | 'updatedAt' | 'description'> | null;
   nodes: AgentNode[];
@@ -79,6 +95,8 @@ export interface CanvasAgentState {
   selectedNodes: AgentNode[];
   currentMessages: AgentCurrentMessage[];
   mergeContext: AgentMergeContext | null;
+  nodeContext: NodeContext | null;
+  llmConfig: LLMConfig;
 }
 
 function publicMessages(messages: ChatMessage[]) {
@@ -114,12 +132,13 @@ function summarizeConversation(conversation: Conversation | undefined, nodeId: s
   };
 }
 
-function summarizeNode(node: ChatNode, conversation: Conversation | undefined): AgentNode {
+function summarizeNode(node: ChatNode, conversation: Conversation | undefined, index: number): AgentNode {
   const messages = publicMessages(conversation?.messages ?? []);
   const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
   const lastAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
 
   return {
+    index,
     id: node.id,
     topic: node.data.topic,
     label: node.data.label,
@@ -179,15 +198,24 @@ function buildMergeContext(selectedNodes: AgentNode[], conversations: Record<str
   };
 }
 
-export function buildCanvasAgentState(): CanvasAgentState {
+// Set by useNodeCopilotChat when the user actively sends a message in a node.
+// The bridge's next sync will pick it up automatically.
+let _activeNodeContext: NodeContext | null = null;
+export function setActiveNodeContext(ctx: NodeContext | null) {
+  _activeNodeContext = ctx;
+}
+
+export function buildCanvasAgentState(nodeContext?: NodeContext | null): CanvasAgentState {
+  const resolvedContext = nodeContext !== undefined ? nodeContext : _activeNodeContext;
   const flow = useFlowStore.getState();
   const chat = useChatStore.getState();
   const workspace = useWorkspaceStore.getState().getActiveWorkspace();
+  const { llmConfig } = useSettingsStore.getState();
 
   const conversations = Object.fromEntries(
     flow.nodes.map((node) => [node.id, summarizeConversation(chat.conversations[node.id], node.id)]),
   );
-  const nodes = flow.nodes.map((node) => summarizeNode(node, chat.conversations[node.id]));
+  const nodes = flow.nodes.map((node, i) => summarizeNode(node, chat.conversations[node.id], i + 1));
   const selectedNodes = nodes.filter((node) => node.selected);
 
   return {
@@ -206,5 +234,12 @@ export function buildCanvasAgentState(): CanvasAgentState {
     selectedNodes,
     currentMessages: buildCurrentMessages(selectedNodes, conversations),
     mergeContext: buildMergeContext(selectedNodes, conversations),
+    nodeContext: resolvedContext,
+    llmConfig: {
+      providerId: llmConfig.providerId,
+      model: llmConfig.model,
+      endpoint: llmConfig.endpoint,
+      temperature: llmConfig.temperature ?? 0.7,
+    },
   };
 }

@@ -14,7 +14,7 @@ interface ChatMessageListProps {
 }
 
 export function ChatMessageList({ nodeId, onExplore }: ChatMessageListProps) {
-  const allMessages = useChatStore((s) => s.conversations[nodeId]?.messages ?? []);
+  const allMessages = useChatStore((s) => s.conversations[nodeId]?.messages) ?? [];
   const showSystemPrompts = useSettingsStore((s) => s.showSystemPrompts);
   const messages = useMemo(
     () => showSystemPrompts ? allMessages : allMessages.filter((m) => m.role !== 'system'),

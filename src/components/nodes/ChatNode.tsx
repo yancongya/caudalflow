@@ -5,7 +5,7 @@ import { Maximize2, X } from 'lucide-react';
 import type { ChatNode } from '../../types/flow';
 import { useChatStore } from '../../stores/chatStore';
 import { useFlowStore } from '../../stores/flowStore';
-import { useChatNode } from '../../hooks/useChatNode';
+import { useNodeCopilotChat } from '../../hooks/useNodeCopilotChat';
 import { streamChat } from '../../services/llm';
 import { calculateBranchPosition } from '../../utils/nodeLayout';
 import { getBranchSystemPrompt } from '../../utils/systemPrompts';
@@ -26,7 +26,7 @@ const PALETTE_COLORS = [
 export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
   const { topic, collapsed, minimized, maximized, parentNodeId, branchText, parentNodeIds, mergeAction, color, label } = data;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const { sendMessage, cancelStream } = useChatNode(id, topic, parentNodeId, branchText, parentNodeIds as string[] | undefined, mergeAction as string | undefined);
+  const { sendMessage, cancelStream } = useNodeCopilotChat(id, topic, parentNodeId, branchText, parentNodeIds as string[] | undefined, mergeAction as string | undefined);
   const { getViewport, setViewport } = useReactFlow();
   const messageCount = useChatStore(
     (s) =>

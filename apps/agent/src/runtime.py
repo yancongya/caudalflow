@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import os
-from typing import Literal
 
-from copilotkit import CopilotKitMiddleware
 from langgraph.graph.state import CompiledStateGraph
 
-RuntimeName = Literal["gemini-flash-deep", "gemini-flash-react", "noop"]
 
 NOOP_FALLBACK_MESSAGE = (
     "Set GEMINI_API_KEY or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow Copilot agent. "
@@ -22,13 +19,9 @@ def build_graph(
     tools: list,
     system_prompt: str,
 ) -> CompiledStateGraph:
-    middleware = [CopilotKitMiddleware()]
-
     if runtime == "noop":
         return _build_noop(NOOP_FALLBACK_MESSAGE)
-    if runtime == "gemini-flash-react":
-        return _build_gemini_react(tools, system_prompt, middleware)
-    return _build_gemini_deep(tools, system_prompt, middleware)
+    return _build_react(tools, system_prompt)
 
 
 from langgraph.graph.message import add_messages as _add_messages
@@ -53,7 +46,7 @@ def _build_noop(message: str) -> CompiledStateGraph:
     return graph.compile()
 
 
-def _gemini_llm():
+def _get_llm():
     openai_key = os.getenv("OPENAI_API_KEY")
     if openai_key:
         from langchain_openai import ChatOpenAI
@@ -67,37 +60,19 @@ def _gemini_llm():
 
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "stub"
     return ChatGoogleGenerativeAI(
-        model=os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+        model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
         temperature=float(os.getenv("AGENT_TEMPERATURE", "0")),
         api_key=api_key,
     )
 
 
-def _build_gemini_deep(
-    tools: list,
-    system_prompt: str,
-    middleware: list,
-) -> CompiledStateGraph:
-    from deepagents import create_deep_agent
-
-    return create_deep_agent(
-        model=_gemini_llm(),
-        tools=tools,
-        system_prompt=system_prompt,
-        middleware=middleware,
-    )
-
-
-def _build_gemini_react(
-    tools: list,
-    system_prompt: str,
-    middleware: list,
-) -> CompiledStateGraph:
+def _build_react(tools: list, system_prompt: str) -> CompiledStateGraph:
+    from copilotkit import CopilotKitMiddleware
     from langchain.agents import create_agent
 
     return create_agent(
-        model=_gemini_llm(),
+        model=_get_llm(),
         tools=tools,
         system_prompt=system_prompt,
-        middleware=middleware,
+        middleware=[CopilotKitMiddleware()],
     )

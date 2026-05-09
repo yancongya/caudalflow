@@ -8,12 +8,14 @@ interface ChatState {
   addMessage: (nodeId: string, role: MessageRole, content: string, images?: {
     base64: string;
     mimeType: string;
-  }[]) => string;
+  }[], triggeredBy?: string) => string;
   appendToLastMessage: (nodeId: string, chunk: string) => void;
   setStreaming: (nodeId: string, streaming: boolean) => void;
   getMessages: (nodeId: string) => ChatMessage[];
   removeConversation: (nodeId: string) => void;
   setConversations: (conversations: Record<string, Conversation>) => void;
+  setConversationMessages: (nodeId: string, messages: ChatMessage[]) => void;
+  addOrUpdateMessage: (nodeId: string, message: ChatMessage) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -29,9 +31,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
-  addMessage: (nodeId, role, content,images) => {
+  addMessage: (nodeId, role, content, images, triggeredBy) => {
     const id = nanoid();
-    const message: ChatMessage = { id, role, content, timestamp: Date.now(),images };
+    const message: ChatMessage = { id, role, content, timestamp: Date.now(), images, triggeredBy };
     const conv = get().conversations[nodeId];
     if (!conv) return id;
     set({
@@ -79,4 +81,31 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   setConversations: (conversations) => set({ conversations }),
+
+  setConversationMessages: (nodeId, messages) => {
+    const conv = get().conversations[nodeId];
+    if (!conv) return;
+    set({
+      conversations: {
+        ...get().conversations,
+        [nodeId]: { ...conv, messages },
+      },
+    });
+  },
+
+  addOrUpdateMessage: (nodeId, message) => {
+    const conv = get().conversations[nodeId];
+    if (!conv) return;
+    const existing = conv.messages.findIndex((m) => m.id === message.id);
+    const messages =
+      existing >= 0
+        ? conv.messages.map((m, i) => (i === existing ? { ...m, ...message } : m))
+        : [...conv.messages, message];
+    set({
+      conversations: {
+        ...get().conversations,
+        [nodeId]: { ...conv, messages },
+      },
+    });
+  },
 }));

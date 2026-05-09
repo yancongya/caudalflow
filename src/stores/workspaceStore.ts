@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { nanoid } from 'nanoid';
 import type { WorkspaceMetadata } from '../types/workspace';
 
 interface WorkspaceState {
@@ -20,7 +19,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       activeWorkspaceId: null,
 
       createWorkspace: (name?: string) => {
-        const id = nanoid();
+        const id = crypto.randomUUID();
         const now = Date.now();
         const metadata: WorkspaceMetadata = {
           id,
@@ -58,7 +57,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
         if (remaining.length === 0) {
           // No workspaces left — create a new default
-          const newId = nanoid();
+          const newId = crypto.randomUUID();
           const now = Date.now();
           set({
             workspaces: [{ id: newId, name: 'My Workspace', createdAt: now, updatedAt: now }],
@@ -84,6 +83,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         workspaces: state.workspaces,
         activeWorkspaceId: state.activeWorkspaceId,
       }),
+      // Migrate nanoid workspace IDs → UUID so LangGraph accepts them as threadIds
+      migrate: (persisted: unknown) => {
+        const state = persisted as { workspaces: WorkspaceMetadata[]; activeWorkspaceId: string | null };
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (state.workspaces?.some((w) => !UUID_RE.test(w.id))) {
+          // Reset to fresh state — old nanoid workspaces can't be migrated cleanly
+          return { workspaces: [], activeWorkspaceId: null };
+        }
+        return state;
+      },
+      version: 2,
     }
   )
 );

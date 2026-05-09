@@ -3,6 +3,8 @@ import { useReactFlow } from '@xyflow/react';
 import { useAgent, useFrontendTool } from '@copilotkit/react-core/v2';
 import { z } from 'zod';
 import { Eye, GitBranch, Merge, Plus, Sparkles } from 'lucide-react';
+import { BranchProposalCard } from './BranchProposalCard';
+import { ChartRenderer } from './ChartRenderer';
 import { useFlowStore } from '../../stores/flowStore';
 import { useChatStore } from '../../stores/chatStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
@@ -246,19 +248,37 @@ export function CanvasCopilotBridge() {
 
   useFrontendTool({
     name: 'appendNodeMessage',
-    description: 'Append a system, user, or assistant message to an existing chat node.',
+    description: 'Append a system, user, or assistant message to an existing chat node. Use triggeredBy to show which node initiated this cross-node update.',
     parameters: z.object({
       nodeId: z.string(),
       role: roleSchema,
       content: z.string(),
+      triggeredBy: z.string().optional(),
     }),
-    handler: async ({ nodeId, role, content }) => {
+    handler: async ({ nodeId, role, content, triggeredBy }) => {
       const exists = useFlowStore.getState().nodes.some((node) => node.id === nodeId);
       if (!exists) return `node ${nodeId} was not found`;
       useChatStore.getState().initConversation(nodeId);
-      useChatStore.getState().addMessage(nodeId, role as MessageRole, content);
+      useChatStore.getState().addMessage(nodeId, role as MessageRole, content, undefined, triggeredBy);
       syncAgentState();
       return `appended ${role} message to ${nodeId}`;
+    },
+  });
+
+  useFrontendTool({
+    name: 'deleteChatNode',
+    description: 'Delete a chat node from the canvas. Use this when the user selects one branch from several alternatives and wants sibling branches removed.',
+    parameters: z.object({
+      nodeId: z.string(),
+    }),
+    handler: async ({ nodeId }) => {
+      const flow = useFlowStore.getState();
+      const exists = flow.nodes.some((node) => node.id === nodeId);
+      if (!exists) return `node ${nodeId} was not found`;
+      flow.removeNode(nodeId);
+      useChatStore.getState().removeConversation(nodeId);
+      syncAgentState();
+      return `deleted node ${nodeId}`;
     },
   });
 
@@ -343,6 +363,29 @@ export function CanvasCopilotBridge() {
       steps: z.array(z.string()).optional(),
     }),
     render: ({ args }) => <LiveMergePlan args={args} />,
+  });
+
+  useFrontendTool({
+    name: 'renderBranchProposal',
+    description: 'Render an inline branch proposal card when suggesting parallel exploration paths before calling createBranchFromNode.',
+    parameters: z.object({
+      parentNodeId: z.string().optional(),
+      parentTopic: z.string().optional(),
+      rationale: z.string().optional(),
+      options: z.array(z.object({ topic: z.string(), prompt: z.string().optional() })).optional(),
+    }),
+    render: ({ args }) => <BranchProposalCard args={args} />,
+  });
+
+  useFrontendTool({
+    name: 'renderChart',
+    description: 'Render a pie, bar, or line chart inline in the Copilot chat stream. Use this whenever the user asks for a chart, graph, or data visualization.',
+    parameters: z.object({
+      chartType: z.enum(['pie', 'bar', 'line']).default('pie'),
+      title: z.string().optional(),
+      data: z.array(z.object({ name: z.string(), value: z.number() })),
+    }),
+    render: ({ args }) => <ChartRenderer args={args} />,
   });
 
   return (

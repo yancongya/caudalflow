@@ -1,17 +1,20 @@
+import { useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { CopilotChatConfigurationProvider, CopilotSidebar } from '@copilotkit/react-core/v2';
 import { Canvas } from './components/canvas/Canvas';
 import { CanvasCopilotBridge } from './components/copilot/CanvasCopilotBridge';
 import { CopilotKitProviderShell } from './components/copilot/CopilotKitProviderShell';
 import { usePersistence } from './hooks/usePersistence';
-import { useWorkspaceStore } from './stores/workspaceStore';
 
 function AppInner() {
   usePersistence();
-  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  // A fresh UUID per React mount (resets on page reload) prevents the "Message not found"
+  // error that occurs when the LangGraph thread's in-memory message history diverges from
+  // the CopilotKit frontend's in-memory message history after a page refresh.
+  const [threadId] = useState(() => crypto.randomUUID());
 
   return (
-    <CopilotChatConfigurationProvider agentId="default" threadId={activeWorkspaceId ?? undefined}>
+    <CopilotChatConfigurationProvider agentId="default" threadId={threadId}>
       <Canvas />
       <CanvasCopilotBridge />
       <CopilotSidebar
