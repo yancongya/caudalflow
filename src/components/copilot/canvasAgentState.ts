@@ -73,12 +73,7 @@ interface AgentMergeContext {
   sources: AgentMergeSource[];
 }
 
-interface NodeContext {
-  nodeId: string;
-  mode: 'root' | 'branch' | 'merge';
-  topic: string;
-  mergeAction?: string;
-}
+type NodeContext = import('../../stores/chatStore').ActiveNodeContext;
 
 interface LLMConfig {
   providerId: string;
@@ -198,15 +193,8 @@ function buildMergeContext(selectedNodes: AgentNode[], conversations: Record<str
   };
 }
 
-// Set by useNodeCopilotChat when the user actively sends a message in a node.
-// The bridge's next sync will pick it up automatically.
-let _activeNodeContext: NodeContext | null = null;
-export function setActiveNodeContext(ctx: NodeContext | null) {
-  _activeNodeContext = ctx;
-}
-
 export function buildCanvasAgentState(nodeContext?: NodeContext | null): CanvasAgentState {
-  const resolvedContext = nodeContext !== undefined ? nodeContext : _activeNodeContext;
+  const resolvedContext = nodeContext !== undefined ? nodeContext : useChatStore.getState().activeNodeContext;
   const flow = useFlowStore.getState();
   const chat = useChatStore.getState();
   const workspace = useWorkspaceStore.getState().getActiveWorkspace();

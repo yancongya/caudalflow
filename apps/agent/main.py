@@ -24,11 +24,12 @@ if not (
     os.getenv("GEMINI_API_KEY")
     or os.getenv("GOOGLE_API_KEY")
     or os.getenv("OPENAI_API_KEY")
+    or os.getenv("ANTHROPIC_API_KEY")
 ):
     runtime = "noop"
     print(
         "\n[runtime] model API key missing — using noop fallback graph.\n"
-        "Set GEMINI_API_KEY or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow agent.\n",
+        "Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow agent.\n",
         flush=True,
     )
 

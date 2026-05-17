@@ -48,24 +48,9 @@ export function SettingsPanel() {
         {config.providerId === 'openai' && (
           <>
             <div>
-              <label className={labelClass}>API Endpoint</label>
-              <input
-                type="text"
-                value={config.endpoint}
-                onChange={(e) => updateConfig({ endpoint: e.target.value })}
-                className={inputClass}
-                placeholder="https://api.openai.com/v1"
-              />
-            </div>
-            <div>
-              <label className={labelClass}>API Key</label>
-              <input
-                type="password"
-                value={config.apiKey}
-                onChange={(e) => updateConfig({ apiKey: e.target.value })}
-                className={inputClass}
-                placeholder="sk-..."
-              />
+              <p className="text-xs text-neutral-500">
+                API key is configured on the server (apps/agent/.env).
+              </p>
             </div>
             <div>
               <label className={labelClass}>Model</label>
@@ -111,24 +96,9 @@ export function SettingsPanel() {
         {config.providerId === 'anthropic' && (
           <>
             <div>
-              <label className={labelClass}>API Endpoint</label>
-              <input
-                type="text"
-                value={config.endpoint}
-                onChange={(e) => updateConfig({ endpoint: e.target.value })}
-                className={inputClass}
-                placeholder="https://api.anthropic.com/v1"
-              />
-            </div>
-            <div>
-              <label className={labelClass}>API Key</label>
-              <input
-                type="password"
-                value={config.apiKey}
-                onChange={(e) => updateConfig({ apiKey: e.target.value })}
-                className={inputClass}
-                placeholder="sk-ant-..."
-              />
+              <p className="text-xs text-neutral-500">
+                API key is configured on the server (apps/agent/.env).
+              </p>
             </div>
             <div>
               <label className={labelClass}>Model</label>

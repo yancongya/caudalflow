@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { StrictMode, useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { CopilotChatConfigurationProvider, CopilotSidebar } from '@copilotkit/react-core/v2';
 import { Canvas } from './components/canvas/Canvas';
@@ -15,8 +15,10 @@ function AppInner() {
 
   return (
     <CopilotChatConfigurationProvider agentId="default" threadId={threadId}>
-      <Canvas />
-      <CanvasCopilotBridge />
+      <StrictMode>
+        <Canvas />
+        <CanvasCopilotBridge />
+      </StrictMode>
       <CopilotSidebar
         defaultOpen={false}
         width={420}

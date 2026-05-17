@@ -47,9 +47,6 @@ export const OpenAIProvider: LLMProvider = {
     callbacks: StreamCallbacks,
     signal: AbortSignal
   ) {
-    const endpoint = config.endpoint.replace(/\/$/, '');
-    const url = `${endpoint}/chat/completions`;
-
     const body = {
       model: config.model,
       messages: toOpenAIMessages(messages),
@@ -59,11 +56,11 @@ export const OpenAIProvider: LLMProvider = {
     };
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch('/api/llm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`,
+          'x-llm-provider': 'openai',
         },
         body: JSON.stringify(body),
         signal,

@@ -10,6 +10,10 @@ export default defineConfig({
         target: process.env.BFF_URL ?? 'http://localhost:4000',
         changeOrigin: true,
       },
+      '/api/llm': {
+        target: process.env.BFF_URL ?? 'http://localhost:4000',
+        changeOrigin: true,
+      },
     },
   },
   test: {

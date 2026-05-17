@@ -2,9 +2,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 
-// Clear stale localStorage on every startup so LangGraph thread state never
-// diverges from what CopilotKit expects (avoids "Message not found" errors).
-localStorage.clear();
+// Clear CopilotKit inspector cache on startup — thread state is server-side
+// and App.tsx already creates a fresh threadId on every mount.
+for (const key of Object.keys(localStorage)) {
+  if (key.startsWith('cpk:')) localStorage.removeItem(key);
+}
 
 createRoot(document.getElementById('root')!).render(
   <App />

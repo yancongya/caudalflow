@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useAgent, useFrontendTool } from '@copilotkit/react-core/v2';
+import { useShallow } from 'zustand/react/shallow';
 import { z } from 'zod';
 import { Eye, GitBranch, Merge, Plus, Sparkles } from 'lucide-react';
 import { BranchProposalCard } from './BranchProposalCard';
@@ -9,11 +10,19 @@ import { useFlowStore } from '../../stores/flowStore';
 import { useChatStore } from '../../stores/chatStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 import { buildCanvasAgentState } from './canvasAgentState';
-import { calculateBranchPosition, calculateMergePosition } from '../../utils/nodeLayout';
-import { getBranchSystemPrompt, getMergeSystemPrompt } from '../../utils/systemPrompts';
-import type { ChatNode } from '../../types/flow';
-import type { MessageRole } from '../../types/chat';
+import {
+  focusNode,
+  createNodeAtEnd,
+  handleCreateBranchFromNode,
+  handleMergeChatNodes,
+  handleDeleteChatNode,
+  handleAppendNodeMessage,
+  handleUpdateChatNode,
+  handleHighlightWorkspaceFinding,
+} from './canvasHandlers';
+import type { ChatMessage, MessageRole } from '../../types/chat';
 
+const EMPTY_MESSAGES: ChatMessage[] = [];
 const roleSchema = z.enum(['system', 'user', 'assistant']);
 
 type NodePreviewArgs = {
@@ -29,26 +38,13 @@ type MergePlanArgs = {
   steps?: string[];
 };
 
-function numberStyleValue(value: unknown, fallback: number) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-}
-
-function focusNode(nodeId: string, setCenter: ReturnType<typeof useReactFlow>['setCenter']) {
-  const node = useFlowStore.getState().nodes.find((item) => item.id === nodeId);
-  if (!node) return false;
-
-  const width = numberStyleValue(node.style?.width, 400);
-  const height = numberStyleValue(node.style?.height, 500);
-  setCenter(node.position.x + width / 2, node.position.y + height / 2, {
-    zoom: 0.9,
-    duration: 350,
-  });
-  return true;
-}
-
 function LiveNodePreview({ args }: { args: NodePreviewArgs }) {
   const node = useFlowStore((state) => state.nodes.find((item) => item.id === args.nodeId));
-  const messages = useChatStore((state) => (args.nodeId ? state.conversations[args.nodeId]?.messages ?? [] : []));
+  const messages = useChatStore(
+    (state) => args.nodeId
+      ? state.conversations[args.nodeId]?.messages ?? EMPTY_MESSAGES
+      : EMPTY_MESSAGES
+  );
   const { setCenter } = useReactFlow();
   const title = args.title ?? node?.data.topic ?? 'Node preview';
   const body =
@@ -78,7 +74,9 @@ function LiveNodePreview({ args }: { args: NodePreviewArgs }) {
 }
 
 function LiveMergePlan({ args }: { args: MergePlanArgs }) {
-  const nodes = useFlowStore((state) => state.nodes.filter((node) => args.nodeIds?.includes(node.id)));
+  const nodes = useFlowStore(
+    useShallow((state) => state.nodes.filter((node) => args.nodeIds?.includes(node.id)))
+  );
   return (
     <div className="my-2 rounded-lg border border-neutral-700 bg-neutral-900 p-3 text-neutral-100 shadow-lg">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
@@ -111,6 +109,8 @@ export function CanvasCopilotBridge() {
   const workspaceId = useWorkspaceStore((state) => state.activeWorkspaceId);
   const nodeCount = useFlowStore((state) => state.nodes.length);
 
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
   const syncAgentState = useCallback(() => {
     if (!agent) return;
     const state = buildCanvasAgentState();
@@ -120,30 +120,24 @@ export function CanvasCopilotBridge() {
     agent.setState(state);
   }, [agent]);
 
+  const debouncedSync = useCallback(() => {
+    clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(syncAgentState, 80);
+  }, [syncAgentState]);
+
   useEffect(() => {
     syncAgentState();
-    const unsubscribeFlow = useFlowStore.subscribe(syncAgentState);
-    const unsubscribeChat = useChatStore.subscribe(syncAgentState);
-    const unsubscribeWorkspace = useWorkspaceStore.subscribe(syncAgentState);
+    const unsubscribeFlow = useFlowStore.subscribe(debouncedSync);
+    const unsubscribeChat = useChatStore.subscribe(debouncedSync);
+    const unsubscribeWorkspace = useWorkspaceStore.subscribe(debouncedSync);
 
     return () => {
       unsubscribeFlow();
       unsubscribeChat();
       unsubscribeWorkspace();
+      clearTimeout(syncTimeoutRef.current);
     };
-  }, [syncAgentState, workspaceId]);
-
-  const createNodeAtEnd = useCallback((topic: string) => {
-    const flow = useFlowStore.getState();
-    const count = flow.nodes.length;
-    return flow.addChatNode(
-      {
-        x: 80 + (count % 4) * 460,
-        y: 80 + Math.floor(count / 4) * 560,
-      },
-      { topic, collapsed: false },
-    );
-  }, []);
+  }, [syncAgentState, debouncedSync, workspaceId]);
 
   useFrontendTool({
     name: 'createChatNode',
@@ -176,30 +170,10 @@ export function CanvasCopilotBridge() {
       prompt: z.string().optional(),
       assistantMessage: z.string().optional(),
     }),
-    handler: async ({ parentNodeId, topic, branchText, prompt, assistantMessage }) => {
-      const flow = useFlowStore.getState();
-      const parent = flow.nodes.find((node) => node.id === parentNodeId);
-      if (!parent) return `parent node ${parentNodeId} was not found`;
-
-      const nodeId = flow.addChatNode(calculateBranchPosition(parent, flow.getChildCount(parentNodeId)), {
-        topic,
-        parentNodeId,
-        branchText: branchText ?? topic,
-        collapsed: false,
-      });
-      flow.addEdge(parentNodeId, nodeId, branchText ?? topic);
-
-      const chat = useChatStore.getState();
-      chat.initConversation(nodeId);
-      const parentMessages = chat.getMessages(parentNodeId).map((message) => ({
-        role: message.role,
-        content: message.content,
-      }));
-      chat.addMessage(nodeId, 'system', getBranchSystemPrompt(parent.data.topic, parentMessages));
-      if (prompt) chat.addMessage(nodeId, 'user', prompt);
-      if (assistantMessage) chat.addMessage(nodeId, 'assistant', assistantMessage);
+    handler: async (args) => {
+      const result = handleCreateBranchFromNode(args);
       syncAgentState();
-      return `created branch ${nodeId}`;
+      return result;
     },
   });
 
@@ -212,37 +186,10 @@ export function CanvasCopilotBridge() {
       mergeAction: z.string(),
       assistantSummary: z.string().optional(),
     }),
-    handler: async ({ nodeIds, topic, mergeAction, assistantSummary }) => {
-      const flow = useFlowStore.getState();
-      const chat = useChatStore.getState();
-      const parents = nodeIds
-        .map((nodeId) => flow.nodes.find((node) => node.id === nodeId))
-        .filter((node): node is ChatNode => Boolean(node));
-
-      if (parents.length < 2) return 'at least two valid source nodes are required';
-
-      const nodeId = flow.addChatNode(calculateMergePosition(parents), {
-        topic,
-        parentNodeIds: parents.map((node) => node.id),
-        mergeAction,
-        collapsed: false,
-      });
-      for (const parent of parents) {
-        flow.addEdge(parent.id, nodeId, mergeAction);
-      }
-
-      chat.initConversation(nodeId);
-      const parentSummaries = parents.map((node) => ({
-        topic: node.data.topic,
-        messages: chat.getMessages(node.id).map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-      }));
-      chat.addMessage(nodeId, 'system', getMergeSystemPrompt(parentSummaries, mergeAction));
-      if (assistantSummary) chat.addMessage(nodeId, 'assistant', assistantSummary);
+    handler: async (args) => {
+      const result = handleMergeChatNodes(args);
       syncAgentState();
-      return `created merge node ${nodeId}`;
+      return result;
     },
   });
 
@@ -256,12 +203,9 @@ export function CanvasCopilotBridge() {
       triggeredBy: z.string().optional(),
     }),
     handler: async ({ nodeId, role, content, triggeredBy }) => {
-      const exists = useFlowStore.getState().nodes.some((node) => node.id === nodeId);
-      if (!exists) return `node ${nodeId} was not found`;
-      useChatStore.getState().initConversation(nodeId);
-      useChatStore.getState().addMessage(nodeId, role as MessageRole, content, undefined, triggeredBy);
+      const result = handleAppendNodeMessage({ nodeId, role: role as MessageRole, content, triggeredBy });
       syncAgentState();
-      return `appended ${role} message to ${nodeId}`;
+      return result;
     },
   });
 
@@ -272,13 +216,9 @@ export function CanvasCopilotBridge() {
       nodeId: z.string(),
     }),
     handler: async ({ nodeId }) => {
-      const flow = useFlowStore.getState();
-      const exists = flow.nodes.some((node) => node.id === nodeId);
-      if (!exists) return `node ${nodeId} was not found`;
-      flow.removeNode(nodeId);
-      useChatStore.getState().removeConversation(nodeId);
+      const result = handleDeleteChatNode(nodeId);
       syncAgentState();
-      return `deleted node ${nodeId}`;
+      return result;
     },
   });
 
@@ -292,17 +232,10 @@ export function CanvasCopilotBridge() {
       color: z.string().nullable().optional(),
       collapsed: z.boolean().optional(),
     }),
-    handler: async ({ nodeId, topic, label, color, collapsed }) => {
-      const node = useFlowStore.getState().nodes.find((item) => item.id === nodeId);
-      if (!node) return `node ${nodeId} was not found`;
-      useFlowStore.getState().updateNodeData(nodeId, {
-        ...(topic ? { topic } : {}),
-        ...(label !== undefined ? { label: label ?? undefined } : {}),
-        ...(color !== undefined ? { color: color ?? undefined } : {}),
-        ...(collapsed !== undefined ? { collapsed } : {}),
-      });
+    handler: async (args) => {
+      const result = handleUpdateChatNode(args);
       syncAgentState();
-      return `updated node ${nodeId}`;
+      return result;
     },
   });
 
@@ -323,22 +256,10 @@ export function CanvasCopilotBridge() {
       finding: z.string(),
       sourceNodeIds: z.array(z.string()).default([]),
     }),
-    handler: async ({ title, finding, sourceNodeIds }) => {
-      const flow = useFlowStore.getState();
-      const nodeId = createNodeAtEnd(title);
-      useFlowStore.getState().updateNodeData(nodeId, {
-        label: 'Finding',
-        color: '#22c55e',
-      });
-      useChatStore.getState().initConversation(nodeId);
-      useChatStore.getState().addMessage(nodeId, 'assistant', finding);
-      for (const sourceId of sourceNodeIds) {
-        if (flow.nodes.some((node) => node.id === sourceId)) {
-          flow.addEdge(sourceId, nodeId, 'finding');
-        }
-      }
+    handler: async (args) => {
+      const result = handleHighlightWorkspaceFinding(args);
       syncAgentState();
-      return `created finding node ${nodeId}`;
+      return result;
     },
   });
 

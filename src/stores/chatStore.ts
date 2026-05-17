@@ -2,8 +2,17 @@ import { create } from 'zustand';
 import { nanoid } from 'nanoid';
 import type { ChatMessage, Conversation, MessageRole } from '../types/chat';
 
+export interface ActiveNodeContext {
+  nodeId: string;
+  mode: 'root' | 'branch' | 'merge';
+  topic: string;
+  mergeAction?: string;
+}
+
 interface ChatState {
   conversations: Record<string, Conversation>;
+  activeNodeContext: ActiveNodeContext | null;
+  setActiveNodeContext: (ctx: ActiveNodeContext | null) => void;
   initConversation: (nodeId: string) => void;
   addMessage: (nodeId: string, role: MessageRole, content: string, images?: {
     base64: string;
@@ -20,6 +29,8 @@ interface ChatState {
 
 export const useChatStore = create<ChatState>((set, get) => ({
   conversations: {},
+  activeNodeContext: null,
+  setActiveNodeContext: (ctx) => set({ activeNodeContext: ctx }),
 
   initConversation: (nodeId) => {
     if (get().conversations[nodeId]) return;

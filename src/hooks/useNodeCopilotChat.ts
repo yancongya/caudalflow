@@ -1,9 +1,8 @@
 import { useCallback, useRef } from 'react';
 import { useChatStore } from '../stores/chatStore';
 import { useFlowStore } from '../stores/flowStore';
-import { streamChat } from '../services/llm';
+import { streamChat, generateTitle } from '../services/llm';
 import { getRootSystemPrompt, getBranchSystemPrompt, getMergeSystemPrompt } from '../utils/systemPrompts';
-import { setActiveNodeContext } from '../components/copilot/canvasAgentState';
 import type { ChatMessage } from '../types/chat';
 import { validateImage, fileToBase64 } from '../utils/image';
 
@@ -33,7 +32,7 @@ export function useNodeCopilotChat(
       // Tell the agent which node is active — the bridge picks this up on the next sync
       const mode: 'root' | 'branch' | 'merge' =
         (parentNodeIds?.length ?? 0) >= 2 ? 'merge' : parentNodeId ? 'branch' : 'root';
-      setActiveNodeContext({ nodeId, mode, topic, mergeAction });
+      useChatStore.getState().setActiveNodeContext({ nodeId, mode, topic, mergeAction });
 
       // Build system prompt (same logic as useChatNode)
       let systemPrompt: string;
@@ -83,6 +82,18 @@ export function useNodeCopilotChat(
           },
           onDone: () => {
             useChatStore.getState().setStreaming(nodeId, false);
+            // Auto-generate title for default-named nodes after first exchange
+            const currentNode = useFlowStore.getState().nodes.find((n) => n.id === nodeId);
+            if (currentNode?.data.topic === 'New Chat') {
+              const msgs = useChatStore.getState().getMessages(nodeId);
+              const userMsg = msgs.find((m) => m.role === 'user');
+              const assistantMsg = msgs.find((m) => m.role === 'assistant' && m.content);
+              if (userMsg && assistantMsg) {
+                generateTitle(userMsg.content, assistantMsg.content, (title) => {
+                  useFlowStore.getState().updateNodeData(nodeId, { topic: title });
+                });
+              }
+            }
           },
           onError: (error) => {
             useChatStore

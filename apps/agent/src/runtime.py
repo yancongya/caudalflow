@@ -8,7 +8,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 
 NOOP_FALLBACK_MESSAGE = (
-    "Set GEMINI_API_KEY or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow Copilot agent. "
+    "Set ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY in apps/agent/.env to enable the CaudalFlow Copilot agent. "
     "The frontend and runtime wiring are installed."
 )
 
@@ -46,6 +46,30 @@ def _build_noop(message: str) -> CompiledStateGraph:
     return graph.compile()
 
 
+def merge_system_messages(messages: list) -> list:
+    """Consolidate all system messages into one at the front.
+
+    CopilotKit injects extra system messages that get interleaved
+    with user/assistant turns. The Anthropic API rejects
+    non-consecutive system messages, so we pull them all out and
+    merge them into a single leading SystemMessage.
+    """
+    from langchain_core.messages import SystemMessage
+
+    system_parts: list[str] = []
+    other: list = []
+    for msg in messages:
+        if isinstance(msg, SystemMessage):
+            text = msg.content if isinstance(msg.content, str) else str(msg.content)
+            if text:
+                system_parts.append(text)
+        else:
+            other.append(msg)
+    if system_parts:
+        return [SystemMessage(content="\n\n".join(system_parts))] + other
+    return other
+
+
 def _get_llm():
     openai_key = os.getenv("OPENAI_API_KEY")
     if openai_key:
@@ -53,6 +77,23 @@ def _get_llm():
 
         return ChatOpenAI(
             model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            temperature=float(os.getenv("AGENT_TEMPERATURE", "0")),
+        )
+
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    if anthropic_key:
+        from langchain_anthropic import ChatAnthropic
+
+        class _SystemMergingAnthropic(ChatAnthropic):
+            """ChatAnthropic subclass that merges scattered system messages."""
+
+            def _get_request_payload(self, messages: list, **kwargs) -> dict:
+                return super()._get_request_payload(
+                    merge_system_messages(messages), **kwargs
+                )
+
+        return _SystemMergingAnthropic(
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
             temperature=float(os.getenv("AGENT_TEMPERATURE", "0")),
         )
 

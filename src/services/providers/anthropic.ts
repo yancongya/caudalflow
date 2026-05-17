@@ -34,9 +34,6 @@ export const AnthropicProvider: LLMProvider = {
     callbacks: StreamCallbacks,
     signal: AbortSignal
   ) {
-    const endpoint = config.endpoint.replace(/\/$/, '');
-    const url = `${endpoint}/messages`;
-
     // Anthropic expects system as a top-level field, not in the messages array
     const systemMessages = messages.filter((m) => m.role === 'system');
     const nonSystemMessages = messages.filter((m) => m.role !== 'system');
@@ -54,13 +51,11 @@ export const AnthropicProvider: LLMProvider = {
     }
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch('/api/llm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': config.apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
+          'x-llm-provider': 'anthropic',
         },
         body: JSON.stringify(body),
         signal,
