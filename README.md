@@ -101,17 +101,7 @@ Organize your explorations into separate workspaces. Each workspace persists its
 
 ## Quick Start
 
-### Run instantly with npx
-
-```bash
-npx caudalflow
-```
-
-That's it — opens in your browser with the mock provider so you can explore the UI immediately.
-
-### Development Setup
-
-**Prerequisites:** Node.js 20+, Python 3.11+ (for the agent), an API key from [Anthropic](https://console.anthropic.com/), [OpenAI](https://platform.openai.com/), or [Google AI](https://ai.google.dev/)
+**Prerequisites:** Node.js 20+, Python 3.11+, an API key from [Anthropic](https://console.anthropic.com/), [OpenAI](https://platform.openai.com/), or [Google AI](https://ai.google.dev/)
 
 ```bash
 git clone https://github.com/caudal-labs/caudalflow.git
@@ -130,7 +120,7 @@ OPENAI_API_KEY=sk-...
 GOOGLE_API_KEY=...
 ```
 
-Then launch everything with a single command:
+Launch the full stack:
 
 ```bash
 npm run dev:copilot
@@ -138,16 +128,15 @@ npm run dev:copilot
 
 This starts the Vite dev server, the Hono BFF, and the LangGraph agent concurrently. Open **http://localhost:5173** — the canvas and copilot sidebar are ready.
 
-You can also run the frontend alone with `npm run dev` (mock provider only — no real LLM responses without the BFF).
-
-### Connect an LLM
-
-1. Add your API key to `apps/agent/.env`
-2. Start the stack with `npm run dev:copilot` (or at minimum `npm run dev:ui` + `npm run dev:bff`)
-3. Open **Settings** (gear icon, left toolbar) and select your provider
-4. Start chatting — responses stream in real-time
-
 > **Your keys stay on your machine.** API keys live in your local `.env` file and go through your local BFF to the provider — never a third-party server.
+
+### Try the UI without a key
+
+```bash
+npx caudalflow
+```
+
+Runs the frontend with a built-in mock provider — useful for exploring the canvas, branching, and merging without setting up the backend. No real LLM responses.
 
 ---
 
