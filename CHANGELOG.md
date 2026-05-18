@@ -24,7 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Architecture expanded from browser-only to optional client-server with BFF and agent
+- **Breaking:** LLM API keys are now configured via `apps/agent/.env` instead of the browser Settings panel — the BFF proxies all LLM requests
+- **Breaking:** Real LLM usage requires the BFF (`npm run dev:bff` or `npm run dev:copilot`); browser-only mode is limited to the mock provider
+- Architecture expanded from browser-only to client-server with BFF and agent
 - CI job renamed from `build` to `node` for clarity
 
 ### Fixed

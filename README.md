@@ -130,14 +130,6 @@ This starts the Vite dev server, the Hono BFF, and the LangGraph agent concurren
 
 > **Your keys stay on your machine.** API keys live in your local `.env` file and go through your local BFF to the provider — never a third-party server.
 
-### Try the UI without a key
-
-```bash
-npx caudalflow
-```
-
-Runs the frontend with a built-in mock provider — useful for exploring the canvas, branching, and merging without setting up the backend. No real LLM responses.
-
 ---
 
 ## How It Works
