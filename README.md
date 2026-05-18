@@ -107,11 +107,11 @@ Organize your explorations into separate workspaces. Each workspace persists its
 npx caudalflow
 ```
 
-That's it — opens in your browser, runs entirely on your machine. Works out of the box with the mock provider; plug in an API key in Settings for real LLM responses.
+That's it — opens in your browser with the mock provider so you can explore the UI immediately.
 
-### With AI Copilot
+### Development Setup
 
-To run the full stack (frontend + BFF + LangGraph agent):
+**Prerequisites:** Node.js 20+, Python 3.11+ (for the agent), an API key from [Anthropic](https://console.anthropic.com/), [OpenAI](https://platform.openai.com/), or [Google AI](https://ai.google.dev/)
 
 ```bash
 git clone https://github.com/caudal-labs/caudalflow.git
@@ -136,29 +136,18 @@ Then launch everything with a single command:
 npm run dev:copilot
 ```
 
-This starts the Vite dev server, the Hono BFF, and the LangGraph agent concurrently. Open **http://localhost:5173** and click the copilot sidebar to start.
+This starts the Vite dev server, the Hono BFF, and the LangGraph agent concurrently. Open **http://localhost:5173** — the canvas and copilot sidebar are ready.
 
-### Development Setup (canvas only)
-
-**Prerequisites:** Node.js 20+, an API key from [Anthropic](https://console.anthropic.com/) or [OpenAI](https://platform.openai.com/) (optional — mock mode works out of the box)
-
-```bash
-git clone https://github.com/caudal-labs/caudalflow.git
-cd caudalflow
-npm install
-npm run dev
-```
-
-Open **http://localhost:5173** — you're in. The mock provider is active by default, so you can explore the full UI immediately.
+You can also run the frontend alone with `npm run dev` (mock provider only — no real LLM responses without the BFF).
 
 ### Connect an LLM
 
-1. Click the **Settings** gear icon (left toolbar)
-2. Select **Anthropic** or **OpenAI** from the provider dropdown
-3. Paste your API key
+1. Add your API key to `apps/agent/.env`
+2. Start the stack with `npm run dev:copilot` (or at minimum `npm run dev:ui` + `npm run dev:bff`)
+3. Open **Settings** (gear icon, left toolbar) and select your provider
 4. Start chatting — responses stream in real-time
 
-> **Your keys stay on your machine.** In browser-only mode, API keys are stored in localStorage and sent directly to the provider. With the copilot stack, keys live in your local `.env` and go through your local BFF — never a third-party server.
+> **Your keys stay on your machine.** API keys live in your local `.env` file and go through your local BFF to the provider — never a third-party server.
 
 ---
 
