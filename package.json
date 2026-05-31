@@ -50,8 +50,6 @@
     "@ai-sdk/anthropic": "^3.0.81",
     "@ai-sdk/google": "^3.0.80",
     "@ai-sdk/openai": "^3.0.67",
-    "@copilotkit/react-core": "^1.57.0",
-    "@copilotkit/runtime": "^1.57.0",
     "@hono/node-server": "^1.13.6",
     "@tailwindcss/vite": "^4.2.2",
     "@xyflow/react": "^12.10.1",

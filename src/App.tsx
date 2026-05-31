@@ -1,9 +1,7 @@
 import { StrictMode, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlowProvider } from '@xyflow/react';
-import { CopilotChatConfigurationProvider } from '@copilotkit/react-core/v2';
 import { Canvas } from './components/canvas/Canvas';
-import { CanvasCopilotBridge } from './components/copilot/CanvasCopilotBridge';
 import { CopilotKitProviderShell } from './components/copilot/CopilotKitProviderShell';
 import { CustomCopilotChat } from './components/copilot/CustomCopilotChat';
 import { usePersistence } from './hooks/usePersistence';
@@ -14,7 +12,6 @@ function AppInner() {
   const [showChat, setShowChat] = useState(false);
   const theme = useSettingsStore((s) => s.theme);
   usePersistence();
-  const [threadId] = useState(() => crypto.randomUUID());
 
   // Apply theme on mount and when theme changes
   useEffect(() => {
@@ -30,11 +27,8 @@ function AppInner() {
   }, [theme]);
 
   return (
-    <CopilotChatConfigurationProvider agentId="default" threadId={threadId}>
-      <StrictMode>
-        <Canvas />
-        <CanvasCopilotBridge />
-      </StrictMode>
+    <StrictMode>
+      <Canvas />
       
       {/* Chat Toggle Button */}
       <button
@@ -58,7 +52,7 @@ function AppInner() {
 
       {/* Custom Chat Panel */}
       <CustomCopilotChat isOpen={showChat} onClose={() => setShowChat(false)} />
-    </CopilotChatConfigurationProvider>
+    </StrictMode>
   );
 }
 

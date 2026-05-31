@@ -1,31 +1,11 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
-import { CopilotRuntime, createCopilotEndpoint } from '@copilotkit/runtime/v2';
-import { LangGraphAgent } from '@copilotkit/runtime/langgraph';
-
-const agent = new LangGraphAgent({
-  deploymentUrl: process.env.LANGGRAPH_DEPLOYMENT_URL ?? 'http://localhost:8133',
-  graphId: process.env.LANGGRAPH_GRAPH_ID ?? 'default',
-  langsmithApiKey: process.env.LANGSMITH_API_KEY || undefined,
-  assistantConfig: {
-    recursion_limit: Number(process.env.LANGGRAPH_RECURSION_LIMIT ?? 80),
-  },
-});
-
-const copilotApp = createCopilotEndpoint({
-  basePath: '/api/copilotkit',
-  runtime: new CopilotRuntime({
-    agents: { default: agent },
-    identifyUser: () => ({
-      id: process.env.COPILOT_USER_ID ?? 'local-user',
-      name: process.env.COPILOT_USER_NAME ?? 'CaudalFlow User',
-    }),
-    licenseToken: process.env.COPILOTKIT_LICENSE_TOKEN,
-    openGenerativeUI: true,
-    a2ui: { injectA2UITool: true },
-  }),
-});
+import { streamText, tool } from 'ai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
 
 const app = new Hono();
 
@@ -38,6 +18,7 @@ app.use(
   }),
 );
 
+// LLM provider configs
 const providerConfig: Record<string, { url: string; authHeader: (key: string) => Record<string, string>; envKey: string }> = {
   anthropic: {
     url: 'https://api.anthropic.com/v1/messages',
@@ -51,6 +32,7 @@ const providerConfig: Record<string, { url: string; authHeader: (key: string) =>
   },
 };
 
+// LLM proxy endpoint (for direct node chat)
 app.post('/api/llm', async (c) => {
   const provider = c.req.header('x-llm-provider');
   const cfg = provider ? providerConfig[provider] : undefined;
@@ -83,11 +65,160 @@ app.post('/api/llm', async (c) => {
   });
 });
 
-app.route('/', copilotApp);
+// Canvas tools that the agent can call
+const canvasTools = {
+  createChatNode: tool({
+    description: 'Create a new chat node on the canvas',
+    parameters: z.object({
+      topic: z.string().default('New Chat'),
+      x: z.number().optional(),
+      y: z.number().optional(),
+    }),
+  }),
+  createBranchFromNode: tool({
+    description: 'Create a branch from an existing node',
+    parameters: z.object({
+      parentNodeId: z.string(),
+      topic: z.string(),
+      prompt: z.string().optional(),
+    }),
+  }),
+  mergeChatNodes: tool({
+    description: 'Merge multiple nodes into one',
+    parameters: z.object({
+      nodeIds: z.array(z.string()),
+      action: z.string(),
+    }),
+  }),
+  deleteChatNode: tool({
+    description: 'Delete a chat node',
+    parameters: z.object({
+      nodeId: z.string(),
+    }),
+  }),
+  updateChatNode: tool({
+    description: 'Update a chat node properties',
+    parameters: z.object({
+      nodeId: z.string(),
+      topic: z.string().optional(),
+      color: z.string().optional(),
+      label: z.string().optional(),
+    }),
+  }),
+  focusChatNode: tool({
+    description: 'Focus the viewport on a specific node',
+    parameters: z.object({
+      nodeId: z.string(),
+    }),
+  }),
+  renderChart: tool({
+    description: 'Render a chart in the chat',
+    parameters: z.object({
+      chartType: z.enum(['pie', 'bar', 'line']),
+      title: z.string().optional(),
+      data: z.array(z.object({ name: z.string(), value: z.number() })),
+    }),
+  }),
+  renderBranchProposal: tool({
+    description: 'Render a branch proposal card',
+    parameters: z.object({
+      parentNodeId: z.string().optional(),
+      parentTopic: z.string().optional(),
+      rationale: z.string().optional(),
+      options: z.array(z.object({ topic: z.string(), prompt: z.string().optional() })).optional(),
+    }),
+  }),
+  renderMergePlan: tool({
+    description: 'Render a merge plan card',
+    parameters: z.object({
+      title: z.string(),
+      nodeIds: z.array(z.string()),
+      rationale: z.string().optional(),
+    }),
+  }),
+};
+
+// Agent endpoint
+app.post('/api/agent', async (c) => {
+  const { message, canvasState, threadId } = await c.req.json();
+
+  const runtime = process.env.AGENT_RUNTIME ?? 'anthropic';
+  
+  let apiKey: string | undefined;
+  let model: any;
+
+  switch (runtime) {
+    case 'anthropic':
+      apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) return c.json({ error: 'Missing ANTHROPIC_API_KEY' }, 500);
+      const anthropic = createAnthropic({ apiKey });
+      model = anthropic('claude-sonnet-4-20250514');
+      break;
+    case 'openai':
+      apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) return c.json({ error: 'Missing OPENAI_API_KEY' }, 500);
+      const openai = createOpenAI({ apiKey });
+      model = openai('gpt-4o-mini');
+      break;
+    case 'gemini':
+      apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return c.json({ error: 'Missing GEMINI_API_KEY' }, 500);
+      const google = createGoogleGenerativeAI({ apiKey });
+      model = google('gemini-2.0-flash');
+      break;
+    default:
+      return c.json({ error: `Unknown runtime: ${runtime}` }, 400);
+  }
+
+  // Build system prompt with canvas state
+  const systemPrompt = buildSystemPrompt(canvasState);
+
+  // Stream response
+  const result = streamText({
+    model,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: message }],
+    tools: canvasTools,
+    maxSteps: 10,
+  });
+
+  // Return streaming response
+  return new Response(result.textStream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+});
+
+function buildSystemPrompt(canvasState: any): string {
+  const nodeCount = canvasState.nodes?.length ?? 0;
+  const edgeCount = canvasState.edges?.length ?? 0;
+  
+  return `You are CaudalFlow AI Assistant, helping users manage their conversation canvas.
+
+Current canvas state:
+- ${nodeCount} nodes
+- ${edgeCount} edges
+
+You can help users by:
+1. Creating new chat nodes
+2. Branching from existing nodes
+3. Merging multiple nodes
+4. Deleting nodes
+5. Updating node properties
+6. Focusing on specific nodes
+7. Rendering charts and visualizations
+8. Proposing branches and merge plans
+
+When the user asks you to do something with the canvas, use the appropriate tool.`;
+}
 
 const port = Number(process.env.PORT ?? 4000);
 
 serve({ fetch: app.fetch, port }, () => {
-  console.log(`CopilotKit BFF ready at http://localhost:${port}/api/copilotkit`);
-  console.log(`LLM proxy ready at http://localhost:${port}/api/llm`);
+  console.log(`BFF ready at http://localhost:${port}`);
+  console.log(`LLM proxy: http://localhost:${port}/api/llm`);
+  console.log(`Agent: http://localhost:${port}/api/agent`);
 });
