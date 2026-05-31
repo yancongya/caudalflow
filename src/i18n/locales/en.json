@@ -83,7 +83,10 @@
     "minimize": "Minimize",
     "maximize": "Maximize",
     "restoreSize": "Restore size",
+    "restore": "Restore",
     "addLabelAndColor": "Add label and color",
+    "addLabel": "Add label...",
+    "clear": "Clear",
     "close": "Close"
   },
   "selection": {
@@ -106,7 +109,18 @@
     "noData": "No chart data provided."
   },
   "copilot": {
-    "nodesAvailable": "{{count}} canvas nodes are available to Copilot"
+    "nodesAvailable": "{{count}} canvas nodes are available to Copilot",
+    "chat": {
+      "title": "CaudalFlow Assistant",
+      "initial": "What can I help you with?",
+      "placeholder": "Type a message...",
+      "send": "Send",
+      "thinking": "Thinking...",
+      "welcome": "Hello! I'm your CaudalFlow assistant. I can help you create and manage canvas nodes, branch conversations, and more.",
+      "suggestion1": "Create a new chat node",
+      "suggestion2": "Help me organize my notes",
+      "suggestion3": "What can you do?"
+    }
   },
   "common": {
     "loading": "Loading...",

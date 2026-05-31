@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { Maximize2, X } from 'lucide-react';
@@ -24,6 +25,7 @@ const PALETTE_COLORS = [
 ];
 
 export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
+  const { t } = useTranslation();
   const { topic, collapsed, minimized, maximized, parentNodeId, branchText, parentNodeIds, mergeAction, color, label } = data;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const { sendMessage, cancelStream } = useNodeCopilotChat(id, topic, parentNodeId, branchText, parentNodeIds as string[] | undefined, mergeAction as string | undefined);
@@ -365,14 +367,14 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
         <button
           onClick={handleRestore}
           className="nodrag text-neutral-500 hover:text-neutral-200 transition-colors"
-          title="Restore"
+          title={t('node.restore')}
         >
           <Maximize2 size={12} />
         </button>
         <button
           onClick={handleClose}
           className="nodrag text-neutral-500 hover:text-red-400 transition-colors"
-          title="Close"
+          title={t('node.close')}
         >
           <X size={12} />
         </button>
@@ -463,7 +465,7 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
                 setIsPaletteOpen(false);
               }
             }}
-            placeholder="Add label..."
+            placeholder={t('node.addLabel')}
             maxLength={20}
             className="w-full text-xs bg-neutral-800 px-2 py-1 rounded outline-none"
           />
@@ -475,7 +477,7 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
             }}
             className="text-xs text-red-400 mt-2"
           >
-            Clear
+            {t('node.clear')}
           </button>
         </div>
       )}

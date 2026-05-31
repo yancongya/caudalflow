@@ -83,7 +83,10 @@
     "minimize": "最小化",
     "maximize": "最大化",
     "restoreSize": "恢复大小",
+    "restore": "恢复",
     "addLabelAndColor": "添加标签和颜色",
+    "addLabel": "添加标签...",
+    "clear": "清除",
     "close": "关闭"
   },
   "selection": {
@@ -106,7 +109,18 @@
     "noData": "未提供图表数据。"
   },
   "copilot": {
-    "nodesAvailable": "{{count}} 个画布节点可用于 Copilot"
+    "nodesAvailable": "{{count}} 个画布节点可用于 Copilot",
+    "chat": {
+      "title": "CaudalFlow 助手",
+      "initial": "有什么我可以帮助您的？",
+      "placeholder": "输入消息...",
+      "send": "发送",
+      "thinking": "思考中...",
+      "welcome": "您好！我是您的 CaudalFlow 助手。我可以帮您创建和管理画布节点、分支对话等。",
+      "suggestion1": "创建新的聊天节点",
+      "suggestion2": "帮我整理笔记",
+      "suggestion3": "你能做什么？"
+    }
   },
   "common": {
     "loading": "加载中...",

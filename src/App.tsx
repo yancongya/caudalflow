@@ -1,4 +1,5 @@
 import { StrictMode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ReactFlowProvider } from '@xyflow/react';
 import { CopilotChatConfigurationProvider, CopilotSidebar } from '@copilotkit/react-core/v2';
 import { Canvas } from './components/canvas/Canvas';
@@ -7,6 +8,7 @@ import { CopilotKitProviderShell } from './components/copilot/CopilotKitProvider
 import { usePersistence } from './hooks/usePersistence';
 
 function AppInner() {
+  const { t } = useTranslation();
   usePersistence();
   // A fresh UUID per React mount (resets on page reload) prevents the "Message not found"
   // error that occurs when the LangGraph thread's in-memory message history diverges from
@@ -23,6 +25,11 @@ function AppInner() {
         defaultOpen={false}
         width={420}
         input={{ disclaimer: () => null }}
+        labels={{
+          title: t('copilot.chat.title'),
+          initial: t('copilot.chat.initial'),
+          placeholder: t('copilot.chat.placeholder'),
+        }}
       />
     </CopilotChatConfigurationProvider>
   );

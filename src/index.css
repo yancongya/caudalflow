@@ -89,3 +89,54 @@ html, body, #root {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #525252;
 }
+
+/* CopilotKit Theme Customization */
+:root {
+  --copilot-kit-primary-color: #6366f1;
+  --copilot-kit-secondary-color: #4f46e5;
+  --copilot-kit-background-color: #171717;
+  --copilot-kit-foreground-color: #e5e5e5;
+  --copilot-kit-border-color: #262626;
+  --copilot-kit-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* CopilotKit Sidebar Styling */
+.copilotKitSidebar {
+  background-color: #171717 !important;
+  border-left: 1px solid #262626 !important;
+}
+
+.copilotKitSidebar .copilotKitChat {
+  background-color: #171717 !important;
+}
+
+.copilotKitSidebar .copilotKitMessages {
+  background-color: #0a0a0a !important;
+}
+
+.copilotKitSidebar .copilotKitInput {
+  background-color: #262626 !important;
+  border-color: #404040 !important;
+}
+
+.copilotKitSidebar .copilotKitInput:focus-within {
+  border-color: #6366f1 !important;
+}
+
+.copilotKitSidebar .copilotKitSendButton {
+  background-color: #6366f1 !important;
+}
+
+.copilotKitSidebar .copilotKitSendButton:hover {
+  background-color: #4f46e5 !important;
+}
+
+.copilotKitSidebar .copilotKitResponse {
+  background-color: #262626 !important;
+  border-radius: 8px !important;
+}
+
+.copilotKitSidebar .copilotKitUserMessage {
+  background-color: #6366f1 !important;
+  border-radius: 8px !important;
+}

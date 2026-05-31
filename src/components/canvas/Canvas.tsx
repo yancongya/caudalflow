@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
   Background,
@@ -39,6 +40,7 @@ function SelectionHandler({ onSelectionChange }: { onSelectionChange: (params: O
 }
 
 export function Canvas() {
+  const { t } = useTranslation();
   const nodes = useFlowStore((s) => s.nodes);
   const edges = useFlowStore((s) => s.edges);
   const onNodesChange = useFlowStore((s) => s.onNodesChange);
@@ -78,12 +80,12 @@ export function Canvas() {
       }
 
       const nodeId = flowStore.addChatNode({ x, y }, {
-        topic: 'New Chat',
+        topic: t('canvas.newChat'),
         collapsed: false,
       });
       useChatStore.getState().initConversation(nodeId);
     },
-    []
+    [t]
   );
 
   const handleMerge = useCallback(
