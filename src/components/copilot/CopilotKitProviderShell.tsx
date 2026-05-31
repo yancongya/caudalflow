@@ -8,6 +8,7 @@ export function CopilotKitProviderShell({ children }: { children: React.ReactNod
       runtimeUrl="/api/copilotkit"
       publicApiKey={import.meta.env.VITE_COPILOT_CLOUD_PUBLIC_API_KEY || undefined}
       openGenerativeUI={{}}
+      className="dark"
     >
       {children}
     </CopilotKitProvider>
