@@ -92,7 +92,10 @@ html, body, #root {
 
 /* CopilotKit Dark Theme - Override light mode defaults */
 .dark [data-copilotkit],
-[data-copilotkit].dark {
+[data-copilotkit].dark,
+[data-copilotkit] .dark,
+.copilotKitDarkMode,
+.copilotKitDarkMode [data-copilotkit] {
   --background: #0a0a0a;
   --foreground: #e5e5e5;
   --card: #171717;
@@ -120,6 +123,14 @@ html, body, #root {
   --sidebar-accent-foreground: #e5e5e5;
   --sidebar-border: #262626;
   --sidebar-ring: #6366f1;
+  color-scheme: dark;
+}
+
+/* Force dark mode on all CopilotKit elements */
+[data-copilotkit] {
+  color-scheme: dark !important;
+  background-color: #171717 !important;
+  color: #e5e5e5 !important;
 }
 
 /* CopilotKit Sidebar Dark Theme */
@@ -222,4 +233,75 @@ html, body, #root {
 
 [data-copilot-sidebar-toggle]:hover {
   background-color: #262626 !important;
+}
+
+/* Header - Top bar */
+[data-copilot-sidebar] header,
+[data-copilot-sidebar] [data-sidebar-header],
+[data-copilot-sidebar] > div > header,
+[data-copilot-sidebar] > aside > div > header {
+  background-color: #171717 !important;
+  border-bottom: 1px solid #262626 !important;
+  color: #e5e5e5 !important;
+}
+
+/* Bottom input container */
+[data-copilot-sidebar] [data-sidebar-chat-input-container],
+[data-copilot-sidebar] > aside > div > div > div > div[class*="absolute"][class*="bottom-0"],
+[data-copilot-sidebar] > div > div > div > div[class*="absolute"][class*="bottom-0"] {
+  background-color: #171717 !important;
+  border-top: 1px solid #262626 !important;
+}
+
+/* Input wrapper */
+[data-copilot-sidebar] textarea,
+[data-copilot-sidebar] input[type="text"],
+[data-copilot-sidebar] [data-sidebar-chat-input] textarea {
+  background-color: #262626 !important;
+  color: #e5e5e5 !important;
+  border-color: #404040 !important;
+}
+
+[data-copilot-sidebar] textarea::placeholder,
+[data-copilot-sidebar] input[type="text"]::placeholder {
+  color: #737373 !important;
+}
+
+/* All buttons in sidebar */
+[data-copilot-sidebar] button {
+  color: #e5e5e5 !important;
+}
+
+[data-copilot-sidebar] button:hover {
+  background-color: #404040 !important;
+}
+
+/* CopilotKit generic overrides for any remaining light elements */
+[data-copilotkit] [data-copilot-chat-header] {
+  background-color: #171717 !important;
+  border-bottom: 1px solid #262626 !important;
+}
+
+[data-copilotkit] [data-copilot-chat-footer] {
+  background-color: #171717 !important;
+  border-top: 1px solid #262626 !important;
+}
+
+/* Override any white/light backgrounds */
+[data-copilotkit] *:not([class*="dark"]):not([class*="neutral"]) {
+  background-color: inherit;
+}
+
+/* Ensure text is visible */
+[data-copilotkit] span,
+[data-copilotkit] p,
+[data-copilotkit] div {
+  color: #e5e5e5;
+}
+
+/* Header title specifically */
+[data-copilot-sidebar] h1,
+[data-copilot-sidebar] h2,
+[data-copilot-sidebar] h3 {
+  color: #e5e5e5 !important;
 }

@@ -112,14 +112,19 @@
     "nodesAvailable": "{{count}} canvas nodes are available to Copilot",
     "chat": {
       "title": "CaudalFlow Assistant",
-      "initial": "What can I help you with?",
-      "placeholder": "Type a message...",
-      "send": "Send",
-      "thinking": "Thinking...",
-      "welcome": "Hello! I'm your CaudalFlow assistant. I can help you create and manage canvas nodes, branch conversations, and more.",
-      "suggestion1": "Create a new chat node",
-      "suggestion2": "Help me organize my notes",
-      "suggestion3": "What can you do?"
+      "modalHeaderTitle": "CaudalFlow Assistant",
+      "welcomeMessageText": "How can I help you today?",
+      "chatInputPlaceholder": "Type a message...",
+      "chatDisclaimerText": "AI can make mistakes. Please verify important information.",
+      "chatToggleOpenLabel": "Open chat",
+      "chatToggleCloseLabel": "Close chat",
+      "assistantMessageToolbarCopyMessageLabel": "Copy",
+      "assistantMessageToolbarThumbsUpLabel": "Thumbs up",
+      "assistantMessageToolbarThumbsDownLabel": "Thumbs down",
+      "assistantMessageToolbarReadAloudLabel": "Read aloud",
+      "assistantMessageToolbarRegenerateLabel": "Regenerate",
+      "userMessageToolbarCopyMessageLabel": "Copy",
+      "userMessageToolbarEditMessageLabel": "Edit"
     }
   },
   "common": {

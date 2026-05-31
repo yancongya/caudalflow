@@ -26,9 +26,19 @@ function AppInner() {
         width={420}
         input={{ disclaimer: () => null }}
         labels={{
-          title: t('copilot.chat.title'),
-          initial: t('copilot.chat.initial'),
-          placeholder: t('copilot.chat.placeholder'),
+          modalHeaderTitle: t('copilot.chat.modalHeaderTitle'),
+          welcomeMessageText: t('copilot.chat.welcomeMessageText'),
+          chatInputPlaceholder: t('copilot.chat.chatInputPlaceholder'),
+          chatDisclaimerText: t('copilot.chat.chatDisclaimerText'),
+          chatToggleOpenLabel: t('copilot.chat.chatToggleOpenLabel'),
+          chatToggleCloseLabel: t('copilot.chat.chatToggleCloseLabel'),
+          assistantMessageToolbarCopyMessageLabel: t('copilot.chat.assistantMessageToolbarCopyMessageLabel'),
+          assistantMessageToolbarThumbsUpLabel: t('copilot.chat.assistantMessageToolbarThumbsUpLabel'),
+          assistantMessageToolbarThumbsDownLabel: t('copilot.chat.assistantMessageToolbarThumbsDownLabel'),
+          assistantMessageToolbarReadAloudLabel: t('copilot.chat.assistantMessageToolbarReadAloudLabel'),
+          assistantMessageToolbarRegenerateLabel: t('copilot.chat.assistantMessageToolbarRegenerateLabel'),
+          userMessageToolbarCopyMessageLabel: t('copilot.chat.userMessageToolbarCopyMessageLabel'),
+          userMessageToolbarEditMessageLabel: t('copilot.chat.userMessageToolbarEditMessageLabel'),
         }}
       />
     </CopilotChatConfigurationProvider>

@@ -112,14 +112,19 @@
     "nodesAvailable": "{{count}} 个画布节点可用于 Copilot",
     "chat": {
       "title": "CaudalFlow 助手",
-      "initial": "有什么我可以帮助您的？",
-      "placeholder": "输入消息...",
-      "send": "发送",
-      "thinking": "思考中...",
-      "welcome": "您好！我是您的 CaudalFlow 助手。我可以帮您创建和管理画布节点、分支对话等。",
-      "suggestion1": "创建新的聊天节点",
-      "suggestion2": "帮我整理笔记",
-      "suggestion3": "你能做什么？"
+      "modalHeaderTitle": "CaudalFlow 助手",
+      "welcomeMessageText": "有什么我可以帮助您的？",
+      "chatInputPlaceholder": "输入消息...",
+      "chatDisclaimerText": "AI 可能会犯错。请核实重要信息。",
+      "chatToggleOpenLabel": "打开聊天",
+      "chatToggleCloseLabel": "关闭聊天",
+      "assistantMessageToolbarCopyMessageLabel": "复制",
+      "assistantMessageToolbarThumbsUpLabel": "点赞",
+      "assistantMessageToolbarThumbsDownLabel": "点踩",
+      "assistantMessageToolbarReadAloudLabel": "朗读",
+      "assistantMessageToolbarRegenerateLabel": "重新生成",
+      "userMessageToolbarCopyMessageLabel": "复制",
+      "userMessageToolbarEditMessageLabel": "编辑"
     }
   },
   "common": {
