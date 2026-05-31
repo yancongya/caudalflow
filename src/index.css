@@ -305,3 +305,74 @@ html, body, #root {
 [data-copilot-sidebar] h3 {
   color: #e5e5e5 !important;
 }
+
+/* Bottom input container - cpk classes */
+.cpk\:absolute.cpk\:bottom-0.cpk\:left-0.cpk\:right-0.cpk\:z-20 {
+  background-color: #171717 !important;
+  border-top: 1px solid #262626 !important;
+}
+
+/* Input container inner */
+.cpk\:pointer-events-none.cpk\:relative.cpk\:z-20 {
+  background-color: #171717 !important;
+}
+
+/* Input container with border */
+.cpk\:border-t.cpk\:border-border.cpk\:bg-background {
+  background-color: #171717 !important;
+  border-top-color: #262626 !important;
+}
+
+/* Textarea in input */
+.cpk\:bg-transparent.cpk\:outline-none {
+  background-color: #262626 !important;
+  color: #e5e5e5 !important;
+}
+
+/* Send button */
+.cpk\:inline-flex.cpk\:items-center.cpk\:justify-center.cpk\:rounded-md {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+.cpk\:inline-flex.cpk\:items-center.cpk\:justify-center.cpk\:rounded-md:hover {
+  background-color: #4f46e5 !important;
+}
+
+/* Disclaimer text */
+.cpk\:text-xs.cpk\:text-muted-foreground {
+  color: #737373 !important;
+}
+
+/* All cpk elements - force dark mode */
+[data-copilotkit] [class*="cpk\\:"] {
+  color-scheme: dark !important;
+}
+
+/* Specific override for bottom section */
+[data-copilot-sidebar] > aside > div > div:last-child,
+[data-copilot-sidebar] > div > div:last-child {
+  background-color: #171717 !important;
+  border-top: 1px solid #262626 !important;
+}
+
+/* Input area wrapper - absolute positioned */
+[data-copilot-sidebar] .cpk\\:absolute.cpk\\:bottom-0 {
+  background-color: #171717 !important;
+}
+
+/* Ensure all backgrounds are dark */
+[data-copilot-sidebar] [style*="background-color: white"],
+[data-copilot-sidebar] [style*="background: white"],
+[data-copilot-sidebar] [style*="background-color: #fff"],
+[data-copilot-sidebar] [style*="background: #fff"],
+[data-copilot-sidebar] [style*="background-color: rgb(255"],
+[data-copilot-sidebar] [style*="background: rgb(255"] {
+  background-color: #171717 !important;
+  color: #e5e5e5 !important;
+}
+
+/* Override inline styles */
+[data-copilot-sidebar] div[style*="background"] {
+  background-color: #171717 !important;
+}
