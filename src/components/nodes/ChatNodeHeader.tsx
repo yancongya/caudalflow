@@ -5,6 +5,7 @@ interface ChatNodeHeaderProps {
   topic: string;
   collapsed: boolean;
   maximized: boolean;
+  isPanning?: boolean;
   onToggleCollapse: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
@@ -18,6 +19,7 @@ export function ChatNodeHeader({
   topic,
   collapsed,
   maximized,
+  isPanning,
   onToggleCollapse,
   onMinimize,
   onMaximize,
@@ -29,10 +31,10 @@ export function ChatNodeHeader({
   const { t } = useTranslation();
   
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-700/50 bg-neutral-800/30 rounded-t-xl cursor-grab active:cursor-grabbing">
+    <div className={`flex items-center gap-2 px-3 py-2 border-b border-border bg-surface-800 rounded-t-xl ${isPanning ? 'cursor-grab' : 'cursor-default'}`}>
       <button
         onClick={onToggleCollapse}
-        className="nodrag text-neutral-400 hover:text-neutral-200 transition-colors"
+        className="nodrag text-text-secondary hover:text-text-primary transition-colors"
         title={collapsed ? t('node.expand') : t('node.collapse')}
       >
         {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
@@ -58,7 +60,7 @@ export function ChatNodeHeader({
       </div>
       <button
         onClick={onMinimize}
-        className="nodrag text-neutral-500 hover:text-amber-400 transition-colors"
+        className="nodrag text-text-muted hover:text-amber-400 transition-colors"
         title={t('node.minimize')}
       >
         <Minus size={14} />
@@ -68,7 +70,7 @@ export function ChatNodeHeader({
         className={`nodrag transition-colors ${
           maximized
             ? 'text-accent-400 hover:text-accent-300'
-            : 'text-neutral-500 hover:text-neutral-200'
+            : 'text-text-muted hover:text-text-primary'
         }`}
         title={maximized ? t('node.restoreSize') : t('node.maximize')}
       >
@@ -76,14 +78,14 @@ export function ChatNodeHeader({
       </button>
       <button
         onClick={onTogglePalette}
-        className="nodrag transition-colors text-neutral-500 hover:text-neutral-200"
+        className="nodrag transition-colors text-text-muted hover:text-text-primary"
         title={t('node.addLabelAndColor')}
         >
         <Palette size={14} />
       </button>
       <button
         onClick={onClose}
-        className="nodrag text-neutral-500 hover:text-red-400 transition-colors"
+        className="nodrag text-text-muted hover:text-red-400 transition-colors"
         title={t('node.close')}
       >
         <X size={14} />

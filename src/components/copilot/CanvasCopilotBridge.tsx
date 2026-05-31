@@ -54,17 +54,17 @@ function LiveNodePreview({ args }: { args: NodePreviewArgs }) {
     'No assistant response yet.';
 
   return (
-    <div className="my-2 rounded-lg border border-neutral-700 bg-neutral-900 p-3 text-neutral-100 shadow-lg">
+    <div className="my-2 rounded-lg border border-border bg-surface-950 p-3 text-text-primary shadow-lg">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
         <Sparkles size={15} className="text-accent-400" />
         <span className="truncate">{title}</span>
       </div>
-      <p className="line-clamp-4 text-xs leading-5 text-neutral-300">{body}</p>
+      <p className="line-clamp-4 text-xs leading-5 text-text-secondary">{body}</p>
       {node && (
         <button
           type="button"
           onClick={() => focusNode(node.id, setCenter)}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-neutral-700 px-2 py-1 text-xs text-neutral-200 transition-colors hover:border-accent-500 hover:text-accent-300"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs text-text-primary transition-colors hover:border-accent-500 hover:text-accent-300"
         >
           <Eye size={13} />
           Focus
@@ -79,21 +79,21 @@ function LiveMergePlan({ args }: { args: MergePlanArgs }) {
     useShallow((state) => state.nodes.filter((node) => args.nodeIds?.includes(node.id)))
   );
   return (
-    <div className="my-2 rounded-lg border border-neutral-700 bg-neutral-900 p-3 text-neutral-100 shadow-lg">
+    <div className="my-2 rounded-lg border border-border bg-surface-950 p-3 text-text-primary shadow-lg">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
         <Merge size={15} className="text-accent-400" />
         <span>{args.title ?? 'Preparing merge plan...'}</span>
       </div>
-      {args.rationale && <p className="mb-2 text-xs leading-5 text-neutral-300">{args.rationale}</p>}
+      {args.rationale && <p className="mb-2 text-xs leading-5 text-text-secondary">{args.rationale}</p>}
       <div className="mb-2 flex flex-wrap gap-1.5">
         {nodes.map((node) => (
-          <span key={node.id} className="rounded-full bg-neutral-800 px-2 py-0.5 text-[11px] text-neutral-300">
+          <span key={node.id} className="rounded-full bg-surface-800 px-2 py-0.5 text-[11px] text-text-secondary">
             {node.data.topic}
           </span>
         ))}
       </div>
       {args.steps?.length ? (
-        <ol className="space-y-1 text-xs text-neutral-300">
+        <ol className="space-y-1 text-xs text-text-secondary">
           {args.steps.map((step, index) => (
             <li key={`${step}-${index}`}>{index + 1}. {step}</li>
           ))}
@@ -312,7 +312,7 @@ export function CanvasCopilotBridge() {
   });
 
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 z-20 hidden items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/70 px-3 py-1.5 text-xs text-neutral-400 backdrop-blur md:flex">
+    <div className="pointer-events-none absolute bottom-3 left-3 z-20 hidden items-center gap-2 rounded-full border border-border bg-surface-950 px-3 py-1.5 text-xs text-text-secondary backdrop-blur md:flex">
       <GitBranch size={13} />
       <span>{t('copilot.nodesAvailable', { count: nodeCount })}</span>
       <Plus size={13} className="text-accent-400" />

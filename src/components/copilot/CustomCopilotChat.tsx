@@ -99,18 +99,18 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-[420px] bg-surface-900 border-l border-neutral-800 flex flex-col">
+    <div className="fixed inset-y-0 right-0 z-50 w-[420px] bg-surface-900 border-l border-border flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800 bg-surface-900">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-900">
         <div className="flex items-center gap-2">
           <MessageSquare size={18} className="text-accent-400" />
-          <h2 className="text-sm font-semibold text-neutral-100">
+          <h2 className="text-sm font-semibold text-text-primary">
             {t('copilot.chat.title')}
           </h2>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-surface-800 rounded-lg transition-colors"
+          className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-800 rounded-lg transition-colors"
         >
           <X size={16} />
         </button>
@@ -121,12 +121,12 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
         {isConnecting ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 size={32} className="text-accent-400 animate-spin mb-4" />
-            <p className="text-neutral-400 text-sm">{t('copilot.chat.connecting')}</p>
+            <p className="text-text-secondary text-sm">{t('copilot.chat.connecting')}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <MessageSquare size={48} className="text-neutral-700 mb-4" />
-            <p className="text-neutral-400 text-sm">
+            <MessageSquare size={48} className="bg-surface-700 mb-4" />
+            <p className="text-text-secondary text-sm">
               {t('copilot.chat.welcomeMessageText')}
             </p>
             {error && (
@@ -146,7 +146,7 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
                 className={`max-w-[85%] rounded-xl px-4 py-2.5 ${
                   msg.role === 'user'
                     ? 'bg-accent-500 text-white'
-                    : 'bg-surface-800 text-neutral-200'
+                    : 'bg-surface-800 text-text-primary'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
@@ -159,7 +159,7 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
                   {msg.role === 'assistant' && (
                     <button
                       onClick={() => handleCopy(msg.id, msg.content)}
-                      className="text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="text-text-secondary hover:text-text-primary transition-colors"
                     >
                       {copiedId === msg.id ? (
                         <Check size={12} />
@@ -186,7 +186,7 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-neutral-800 bg-surface-900 p-4">
+      <div className="border-t border-border bg-surface-900 p-4">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -195,7 +195,7 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
             onKeyDown={handleKeyDown}
             placeholder={t('copilot.chat.chatInputPlaceholder')}
             rows={1}
-            className="flex-1 resize-none bg-surface-800 text-sm text-neutral-200 rounded-xl px-4 py-3 placeholder-neutral-500 border border-neutral-700 focus:border-accent-500/50 focus:outline-none transition-colors"
+            className="flex-1 resize-none bg-surface-800 text-sm text-text-primary rounded-xl px-4 py-3 placeholder-text-muted border border-border focus:border-accent-500/50 focus:outline-none transition-colors"
             style={{ minHeight: '48px', maxHeight: '120px' }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
@@ -211,7 +211,7 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
             <Send size={16} />
           </button>
         </div>
-        <p className="text-[10px] text-neutral-600 mt-2 text-center">
+        <p className="text-[10px] text-text-muted mt-2 text-center">
           {t('copilot.chat.chatDisclaimerText')}
         </p>
       </div>

@@ -11,7 +11,10 @@ import {
   HelpCircle,
   Network,
   ChevronDownSquare,
-  ChevronUpSquare
+  ChevronUpSquare,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useFlowStore } from '../../stores/flowStore';
@@ -20,12 +23,16 @@ import { HelpGuidePanel } from '../ui/HelpGuide';
 import { Tooltip } from '../ui/Tooltip';
 import { calculateAutoLayoutPositions } from '../../utils/nodeLayout';
 
-export function CanvasControls() {
+interface CanvasControlsProps {}
+
+export function CanvasControls({}: CanvasControlsProps) {
   const { t } = useTranslation();
   const { zoomIn, zoomOut, fitView, getViewport } = useReactFlow();
   const toggleMinimap = useSettingsStore((s) => s.toggleMinimap);
   const showMinimap = useSettingsStore((s) => s.showMinimap);
   const toggleSettings = useSettingsStore((s) => s.toggleSettings);
+  const theme = useSettingsStore((s) => s.theme);
+  const setTheme = useSettingsStore((s) => s.setTheme);
   const [showHelp, setShowHelp] = useState(false);
   const arrangeTimerRef = useRef<number | null>(null);
   const toggleCollapseSmart = useFlowStore((s) => s.toggleCollapseSmart);
@@ -90,8 +97,17 @@ export function CanvasControls() {
     }, 320);
   };
 
+  const handleThemeToggle = () => {
+    const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
+
   const btnClass =
-    'p-2 rounded-lg bg-surface-900 border border-neutral-700/50 text-neutral-400 hover:text-neutral-200 hover:bg-surface-800 transition-colors';
+    'p-2 rounded-lg bg-surface-900 border border-border text-text-secondary hover:text-text-primary hover:bg-surface-800 transition-colors';
 
   return (
     <>
@@ -101,7 +117,7 @@ export function CanvasControls() {
             <Plus size={18} />
           </button>
         </Tooltip>
-        <div className="h-px bg-neutral-700/50 my-0.5" />
+        <div className="h-px bg-border my-0.5" />
         <Tooltip content={t('canvas.zoomIn')}>
           <button onClick={() => zoomIn()} className={btnClass}>
             <ZoomIn size={18} />
@@ -122,21 +138,10 @@ export function CanvasControls() {
             <Network size={18} />
           </button>
         </Tooltip>
-        <div className="h-px bg-neutral-700/50 my-0.5" />
-        <Tooltip content={t('canvas.toggleMinimap')}>
-          <button
-            onClick={toggleMinimap}
-            className={`${btnClass} ${showMinimap ? 'text-accent-400' : ''}`}
-          >
-            <Map size={18} />
-          </button>
-        </Tooltip>
-        <Tooltip content={t('canvas.toggleCollapse')}>
-          <button  
-            onClick={toggleCollapseSmart}
-            className={btnClass}
-          >
-            {mostlyCollapsed ? <ChevronUpSquare size={18} /> : <ChevronDownSquare size={18} />}        
+        <div className="h-px bg-border my-0.5" />
+        <Tooltip content={t(`settings.theme${theme.charAt(0).toUpperCase() + theme.slice(1)}`)}>
+          <button onClick={handleThemeToggle} className={btnClass}>
+            <ThemeIcon size={18} />
           </button>
         </Tooltip>
         <Tooltip content={t('canvas.settings')}>

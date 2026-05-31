@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import i18n from '../i18n';
 import type { LLMConfig } from '../types/chat';
 
+type Theme = 'light' | 'dark' | 'system';
+
 interface SettingsState {
   llmConfig: LLMConfig;
   showMinimap: boolean;
@@ -10,6 +12,8 @@ interface SettingsState {
   showSettings: boolean;
   welcomeDismissed: boolean;
   language: string;
+  theme: Theme;
+  selectMode: boolean;
   updateLLMConfig: (config: Partial<LLMConfig>) => void;
   toggleMinimap: () => void;
   toggleSystemPrompts: () => void;
@@ -17,6 +21,21 @@ interface SettingsState {
   setShowSettings: (show: boolean) => void;
   dismissWelcome: () => void;
   setLanguage: (lang: string) => void;
+  setTheme: (theme: Theme) => void;
+  setSelectMode: (selectMode: boolean) => void;
+  toggleSelectMode: () => void;
+}
+
+function getSystemTheme(): 'light' | 'dark' {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'dark';
+}
+
+function applyTheme(theme: Theme) {
+  const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -36,6 +55,8 @@ export const useSettingsStore = create<SettingsState>()(
       showSettings: false,
       welcomeDismissed: false,
       language: 'en',
+      theme: 'dark',
+      selectMode: false,
 
       updateLLMConfig: (config) => {
         const current = get().llmConfig;
@@ -70,6 +91,15 @@ export const useSettingsStore = create<SettingsState>()(
         set({ language: lang });
         i18n.changeLanguage(lang);
       },
+
+      setTheme: (theme) => {
+        set({ theme });
+        applyTheme(theme);
+      },
+
+      setSelectMode: (selectMode) => set({ selectMode }),
+
+      toggleSelectMode: () => set({ selectMode: !get().selectMode }),
     }),
     {
       name: 'caudalflow-settings',
@@ -79,7 +109,25 @@ export const useSettingsStore = create<SettingsState>()(
         showSystemPrompts: state.showSystemPrompts,
         welcomeDismissed: state.welcomeDismissed,
         language: state.language,
+        theme: state.theme,
+        selectMode: state.selectMode,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Apply theme on app load
+        if (state?.theme) {
+          applyTheme(state.theme);
+        }
+      },
     }
   )
 );
+
+// Listen for system theme changes
+if (typeof window !== 'undefined') {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const currentTheme = useSettingsStore.getState().theme;
+    if (currentTheme === 'system') {
+      applyTheme('system');
+    }
+  });
+}

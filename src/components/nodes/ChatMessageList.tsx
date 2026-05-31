@@ -60,7 +60,7 @@ export function ChatMessageList({ nodeId, onExplore }: ChatMessageListProps) {
         onMouseUp={onMouseUp}
       >
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-neutral-500 text-sm px-4 text-center">
+          <div className="flex items-center justify-center h-full text-text-muted text-sm px-4 text-center">
             {t('chat.askQuestionToStart')}
           </div>
         ) : (

@@ -1,6 +1,10 @@
 {
   "settings": {
     "title": "设置",
+    "theme": "主题",
+    "themeLight": "亮色",
+    "themeDark": "暗色",
+    "themeSystem": "跟随系统",
     "llmProvider": "LLM 提供商",
     "model": "模型",
     "temperature": "温度",
@@ -62,7 +66,9 @@
     "toggleMinimap": "切换小地图",
     "toggleCollapse": "切换全部折叠",
     "settings": "设置",
-    "help": "帮助和快捷键"
+    "help": "帮助和快捷键",
+    "selectMode": "选择模式 - 点击选择节点",
+    "dragMode": "拖拽模式 - 拖拽移动画布"
   },
   "merge": {
     "mergeNodes": "合并 {{count}} 个节点",

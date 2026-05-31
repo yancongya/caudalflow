@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react';
+import { Handle, Position, NodeResizer, useReactFlow, useUpdateNodeInternals } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Maximize2, X } from 'lucide-react';
+import { Maximize2, X, ChevronRight } from 'lucide-react';
 import type { ChatNode } from '../../types/flow';
 import { useChatStore } from '../../stores/chatStore';
 import { useFlowStore } from '../../stores/flowStore';
+import { useSettingsStore } from '../../stores/settingsStore';
 import { useNodeCopilotChat } from '../../hooks/useNodeCopilotChat';
 import { streamChat } from '../../services/llm';
 import { calculateBranchPosition } from '../../utils/nodeLayout';
@@ -27,9 +28,40 @@ const PALETTE_COLORS = [
 export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
   const { t } = useTranslation();
   const { topic, collapsed, minimized, maximized, parentNodeId, branchText, parentNodeIds, mergeAction, color, label } = data;
+  const selectMode = useSettingsStore((s) => s.selectMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
   const { sendMessage, cancelStream } = useNodeCopilotChat(id, topic, parentNodeId, branchText, parentNodeIds as string[] | undefined, mergeAction as string | undefined);
   const { getViewport, setViewport } = useReactFlow();
+
+  // Listen for space key and delete key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') {
+        return;
+      }
+      if (e.code === 'Space' && !e.repeat) {
+        setIsPanning(true);
+      }
+      // Delete key or X key to trigger delete confirmation
+      if ((e.code === 'Delete' || e.code === 'KeyX') && selected) {
+        e.preventDefault();
+        setShowDeleteConfirmation(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsPanning(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [selected]);
+  const updateNodeInternals = useUpdateNodeInternals();
   const messageCount = useChatStore(
     (s) =>
       s.conversations[id]?.messages.filter((m) => m.role !== "system").length ??
@@ -79,8 +111,16 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
   }, [id]);
 
   const handleToggleCollapse = useCallback(() => {
-    useFlowStore.getState().updateNodeData(id, { collapsed: !collapsed });
-  }, [id, collapsed]);
+    const flowStore = useFlowStore.getState();
+    flowStore.updateNodeData(id, { collapsed: !collapsed });
+    
+    // Force React Flow to re-measure after DOM update
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        updateNodeInternals(id);
+      });
+    });
+  }, [id, collapsed, updateNodeInternals]);
 
   const handleMinimize = useCallback(() => {
     const flowStore = useFlowStore.getState();
@@ -340,7 +380,7 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
     return (
       <div
         className={`relative flex items-center gap-2 bg-surface-900 border rounded-full shadow-lg shadow-black/30 px-3 py-1.5 cursor-grab active:cursor-grabbing ${
-          selected ? 'border-accent-500/60' : 'border-neutral-700/50'
+          selected ? 'border-accent-500/60' : 'border-border'
         } transition-colors`}
         onDoubleClick={handleRestore}
       >
@@ -360,20 +400,20 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
           {topic}
         </span>
         {messageCount > 0 && (
-          <span className="text-[10px] text-neutral-500 bg-neutral-800 rounded-full px-1.5 py-0.5 leading-none">
+          <span className="text-[10px] text-text-muted bg-surface-800 rounded-full px-1.5 py-0.5 leading-none">
             {messageCount}
           </span>
         )}
         <button
           onClick={handleRestore}
-          className="nodrag text-neutral-500 hover:text-neutral-200 transition-colors"
+          className="nodrag text-text-muted hover:text-text-primary transition-colors"
           title={t('node.restore')}
         >
           <Maximize2 size={12} />
         </button>
         <button
           onClick={handleClose}
-          className="nodrag text-neutral-500 hover:text-red-400 transition-colors"
+          className="nodrag text-text-muted hover:text-red-400 transition-colors"
           title={t('node.close')}
         >
           <X size={12} />
@@ -389,17 +429,88 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
     );
   }
 
+  // Collapsed view - small card
+  if (collapsed) {
+    return (
+      <div
+        className={`relative flex items-center gap-2 bg-surface-900 border rounded-lg shadow-lg shadow-black/30 px-3 py-2 cursor-grab active:cursor-grabbing ${
+          selected ? 'border-accent-500/60' : 'border-border'
+        } transition-colors`}
+      >
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!bg-accent-500 !border-none !w-2 !h-2"
+          id="left"
+        />
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!bg-accent-400 !border-none !w-2 !h-2"
+          id="right"
+        />
+        
+        <button
+          onClick={handleToggleCollapse}
+          className="nodrag text-text-secondary hover:text-text-primary transition-colors"
+          title={t('node.expand')}
+        >
+          <ChevronRight size={12} />
+        </button>
+        
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          {color && (
+            <div
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: color }}
+            />
+          )}
+          <span className="text-[11px] font-medium text-text-primary truncate">
+            {topic}
+          </span>
+          {label && (
+            <span className="text-[9px] text-text-muted truncate">
+              ({label})
+            </span>
+          )}
+        </div>
+        
+        {messageCount > 0 && (
+          <span className="text-[9px] text-text-muted bg-surface-700 rounded-full px-1.5 py-0.5 leading-none">
+            {messageCount}
+          </span>
+        )}
+        
+        <button
+          onClick={handleClose}
+          className="nodrag text-text-muted hover:text-red-400 transition-colors"
+          title={t('node.close')}
+        >
+          <X size={12} />
+        </button>
+        {showDeleteConfirmation && (
+          <ChatNodeDeleteConfirmation
+            topic={topic}
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Expanded view - full card
   return (
     <div
       className={`relative flex flex-col bg-surface-900 border rounded-xl shadow-xl shadow-black/30 h-full ${
         selected
           ? 'border-accent-500/60'
-          : 'border-neutral-700/50'
+          : 'border-border'
       } transition-colors`}
     >
       <NodeResizer
         minWidth={320}
-        minHeight={collapsed ? 52 : 300}
+        minHeight={300}
         isVisible={selected}
         lineClassName="!border-accent-500/30"
         handleClassName="!bg-accent-500 !border-none !w-2 !h-2 !rounded-sm"
@@ -419,8 +530,9 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
 
       <ChatNodeHeader
         topic={topic}
-        collapsed={!!collapsed}
+        collapsed={false}
         maximized={!!maximized}
+        isPanning={isPanning}
         onToggleCollapse={handleToggleCollapse}
         onMinimize={handleMinimize}
         onMaximize={handleMaximize}
@@ -441,7 +553,7 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
         <div
           ref={popoverRef}
           onMouseDown={(e) => e.stopPropagation()}
-          className="absolute top-10 right-3 z-50 bg-neutral-900 border border-neutral-700 rounded-lg p-3 w-48 nodrag"
+          className="absolute top-10 right-3 z-50 bg-surface-950 border border-border rounded-lg p-3 w-48 nodrag"
         >
           <div className="flex flex-wrap gap-2 mb-2">
             {PALETTE_COLORS.map((c) => (
@@ -467,7 +579,7 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
             }}
             placeholder={t('node.addLabel')}
             maxLength={20}
-            className="w-full text-xs bg-neutral-800 px-2 py-1 rounded outline-none"
+            className="w-full text-xs bg-surface-800 px-2 py-1 rounded outline-none"
           />
 
           <button
@@ -482,12 +594,8 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
         </div>
       )}
 
-      {!collapsed && (
-        <>
-          <ChatMessageList nodeId={id} onExplore={handleExplore} />
-          <ChatInput nodeId={id} onSend={sendMessage} onCancel={cancelStream} />
-        </>
-      )}
+      <ChatMessageList nodeId={id} onExplore={handleExplore} />
+      <ChatInput nodeId={id} onSend={sendMessage} onCancel={cancelStream} />
     </div>
   );
 }

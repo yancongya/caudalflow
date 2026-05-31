@@ -1,6 +1,10 @@
 {
   "settings": {
     "title": "Settings",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
     "llmProvider": "LLM Provider",
     "model": "Model",
     "temperature": "Temperature",
@@ -62,7 +66,9 @@
     "toggleMinimap": "Toggle Minimap",
     "toggleCollapse": "Toggle Collapse All",
     "settings": "Settings",
-    "help": "Help & shortcuts"
+    "help": "Help & shortcuts",
+    "selectMode": "Select mode - Click to select nodes",
+    "dragMode": "Drag mode - Drag to move canvas"
   },
   "merge": {
     "mergeNodes": "Merge {{count}} nodes",

@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlowProvider } from '@xyflow/react';
 import { CopilotChatConfigurationProvider } from '@copilotkit/react-core/v2';
@@ -7,12 +7,27 @@ import { CanvasCopilotBridge } from './components/copilot/CanvasCopilotBridge';
 import { CopilotKitProviderShell } from './components/copilot/CopilotKitProviderShell';
 import { CustomCopilotChat } from './components/copilot/CustomCopilotChat';
 import { usePersistence } from './hooks/usePersistence';
+import { useSettingsStore } from './stores/settingsStore';
 
 function AppInner() {
   const { t } = useTranslation();
   const [showChat, setShowChat] = useState(false);
+  const theme = useSettingsStore((s) => s.theme);
   usePersistence();
   const [threadId] = useState(() => crypto.randomUUID());
+
+  // Apply theme on mount and when theme changes
+  useEffect(() => {
+    const getSystemTheme = () => {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    };
+
+    const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+  }, [theme]);
 
   return (
     <CopilotChatConfigurationProvider agentId="default" threadId={threadId}>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, Sun, Moon, Monitor } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { listProviders } from '../../services/providers/registry';
 
@@ -13,27 +13,56 @@ export function SettingsPanel() {
   const toggleSystemPrompts = useSettingsStore((s) => s.toggleSystemPrompts);
   const language = useSettingsStore((s) => s.language);
   const setLanguage = useSettingsStore((s) => s.setLanguage);
+  const theme = useSettingsStore((s) => s.theme);
+  const setTheme = useSettingsStore((s) => s.setTheme);
   const providers = listProviders();
 
   if (!showSettings) return null;
 
-  const labelClass = 'block text-xs font-medium text-neutral-400 mb-1';
+  const labelClass = 'block text-xs font-medium mb-1';
   const inputClass =
-    'w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:border-accent-500/50 focus:outline-none transition-colors';
+    'w-full bg-surface-800 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-accent-500/50 focus:outline-none transition-colors';
+
+  const themeOptions = [
+    { value: 'light' as const, icon: Sun, label: t('settings.themeLight') },
+    { value: 'dark' as const, icon: Moon, label: t('settings.themeDark') },
+    { value: 'system' as const, icon: Monitor, label: t('settings.themeSystem') },
+  ];
 
   return (
-    <div className="absolute top-0 right-0 z-50 h-full w-80 bg-surface-900 border-l border-neutral-700/50 shadow-2xl shadow-black/50 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700/50">
-        <h2 className="text-sm font-semibold text-neutral-200">{t('settings.title')}</h2>
+    <div className="absolute top-0 right-0 z-50 h-full w-80 bg-surface-900 border-l border-border shadow-2xl shadow-black/50 flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h2 className="text-sm font-semibold text-text-primary">{t('settings.title')}</h2>
         <button
           onClick={() => setShowSettings(false)}
-          className="text-neutral-400 hover:text-neutral-200 transition-colors"
+          className="text-text-secondary hover:text-text-primary transition-colors"
         >
           <X size={18} />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Theme Section */}
+        <div className="border-b border-border pb-4">
+          <h3 className="text-xs font-semibold text-text-secondary mb-3">{t('settings.theme')}</h3>
+          <div className="flex gap-2">
+            {themeOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setTheme(option.value)}
+                className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${
+                  theme === option.value
+                    ? 'border-accent-500 bg-accent-500/10 text-accent-400'
+                    : 'border-border bg-surface-800 text-text-secondary hover:border-border-hover'
+                }`}
+              >
+                <option.icon size={18} />
+                <span className="text-[10px] font-medium">{option.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label className={labelClass}>{t('settings.llmProvider')}</label>
           <select
@@ -52,7 +81,7 @@ export function SettingsPanel() {
         {config.providerId === 'openai' && (
           <>
             <div>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-text-muted">
                 {t('settings.apiKeyConfigured')}
               </p>
             </div>
@@ -79,7 +108,7 @@ export function SettingsPanel() {
                 }
                 className="w-full accent-accent-500"
               />
-              <div className="text-xs text-neutral-500 text-right">
+              <div className="text-xs text-text-muted text-right">
                 {config.temperature}
               </div>
             </div>
@@ -100,7 +129,7 @@ export function SettingsPanel() {
         {config.providerId === 'anthropic' && (
           <>
             <div>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-text-muted">
                 {t('settings.apiKeyConfigured')}
               </p>
             </div>
@@ -127,7 +156,7 @@ export function SettingsPanel() {
                 }
                 className="w-full accent-accent-500"
               />
-              <div className="text-xs text-neutral-500 text-right">
+              <div className="text-xs text-text-muted text-right">
                 {config.temperature}
               </div>
             </div>
@@ -158,20 +187,20 @@ export function SettingsPanel() {
               min="5"
               max="500"
             />
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-text-muted mt-1">
               {t('settings.tokenDelayDescription')}
             </p>
           </div>
         )}
 
-        <div className="border-t border-neutral-700/50 pt-4">
-          <h3 className="text-xs font-semibold text-neutral-300 mb-3">{t('settings.display')}</h3>
+        <div className="border-t border-border pt-4">
+          <h3 className="text-xs font-semibold text-text-secondary mb-3">{t('settings.display')}</h3>
           <label className="flex items-center justify-between cursor-pointer">
-            <span className="text-xs text-neutral-400">{t('settings.showSystemPrompts')}</span>
+            <span className="text-xs text-text-secondary">{t('settings.showSystemPrompts')}</span>
             <button
               onClick={toggleSystemPrompts}
               className={`relative w-9 h-5 rounded-full transition-colors ${
-                showSystemPrompts ? 'bg-accent-500' : 'bg-neutral-700'
+                showSystemPrompts ? 'bg-accent-500' : 'bg-surface-700'
               }`}
             >
               <span
@@ -181,13 +210,13 @@ export function SettingsPanel() {
               />
             </button>
           </label>
-          <p className="text-[10px] text-neutral-600 mt-1">
+          <p className="text-[10px] text-text-muted mt-1">
             {t('settings.showSystemPromptsDescription')}
           </p>
         </div>
 
-        <div className="border-t border-neutral-700/50 pt-4">
-          <h3 className="text-xs font-semibold text-neutral-300 mb-3">Language</h3>
+        <div className="border-t border-border pt-4">
+          <h3 className="text-xs font-semibold text-text-secondary mb-3">Language</h3>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
@@ -199,8 +228,8 @@ export function SettingsPanel() {
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-neutral-700/50">
-        <p className="text-[10px] text-neutral-600 text-center">
+      <div className="px-4 py-3 border-t border-border">
+        <p className="text-[10px] text-text-muted text-center">
           {t('settings.savedToLocalStorage')}
         </p>
       </div>

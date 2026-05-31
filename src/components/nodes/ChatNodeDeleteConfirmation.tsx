@@ -29,14 +29,27 @@ export function ChatNodeDeleteConfirmation({
   }, [onCancel]);
 
   useEffect(() => {
+    // Use a ref flag to skip the very first mousedown (the one that opened the popup)
+    let skipFirst = true;
     const handleMouseDown = (e: MouseEvent) => {
+      if (skipFirst) {
+        skipFirst = false;
+        return;
+      }
       const target = e.target as Node | null;
       if (target && popupRef.current?.contains(target)) return;
       onCancel();
     };
 
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
+    // Small delay so the opening click is skipped
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleMouseDown);
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
   }, [onCancel]);
 
   return (
@@ -55,11 +68,11 @@ export function ChatNodeDeleteConfirmation({
           <div className="min-w-0 flex-1">
             <div
               id="delete-chat-node-title"
-              className="text-xs font-medium text-neutral-200"
+              className="text-xs font-medium text-text-primary"
             >
               {t('delete.deleteChat')}
             </div>
-            <p className="mt-1 text-[11px] leading-4 text-neutral-400">
+            <p className="mt-1 text-[11px] leading-4 text-text-secondary">
               {t('delete.deleteDescription', { topic: truncatedTopic })}
             </p>
           </div>
@@ -68,7 +81,7 @@ export function ChatNodeDeleteConfirmation({
               e.stopPropagation();
               onCancel();
             }}
-            className="shrink-0 text-neutral-500 hover:text-neutral-200 transition-colors"
+            className="shrink-0 text-text-muted hover:text-text-primary transition-colors"
             title={t('delete.cancel')}
             aria-label={t('delete.cancel')}
           >
@@ -77,9 +90,9 @@ export function ChatNodeDeleteConfirmation({
         </div>
       </div>
 
-      <div className="border-t border-neutral-700/30 px-1.5 py-1 flex justify-end gap-1">
+      <div className="border-t border-border px-1.5 py-1 flex justify-end gap-1">
         <button
-          className="text-xs text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700/50 rounded-md px-2 py-1 transition-colors"
+          className="text-xs text-text-secondary hover:text-text-primary hover:bg-surface-700 rounded-md px-2 py-1 transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             onCancel();
