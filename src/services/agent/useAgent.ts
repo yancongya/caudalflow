@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef } from 'react';
 import { agentClient } from './client';
 import type { AgentEvent, CanvasState } from './types';
-import { useFlowStore } from '../stores/flowStore';
-import { useChatStore } from '../stores/chatStore';
-import { useWorkspaceStore } from '../stores/workspaceStore';
+import { useFlowStore } from '../../stores/flowStore';
+import { useChatStore } from '../../stores/chatStore';
+import { useWorkspaceStore } from '../../stores/workspaceStore';
 
 export function useAgent() {
   const [isRunning, setIsRunning] = useState(false);
