@@ -54,8 +54,12 @@ export function Canvas() {
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent) => {
+      // Prevent default React Flow zoom behavior
+      event.stopPropagation();
+
+      // Don't create node if double-clicking on a node or its children
       const target = event.target as HTMLElement;
-      if (!target.classList.contains('react-flow__pane')) return;
+      if (target.closest('.react-flow__node')) return;
 
       const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
       const flowStore = useFlowStore.getState();
@@ -86,6 +90,14 @@ export function Canvas() {
       useChatStore.getState().initConversation(nodeId);
     },
     [t]
+  );
+
+  const handleConnect = useCallback(
+    (connection: { source: string; target: string; sourceHandle?: string; targetHandle?: string }) => {
+      const flowStore = useFlowStore.getState();
+      flowStore.addEdge(connection.source, connection.target, '');
+    },
+    []
   );
 
   const handleMerge = useCallback(
@@ -200,10 +212,12 @@ export function Canvas() {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onConnect={handleConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           onDoubleClick={handleDoubleClick}
+          zoomOnDoubleClick={false}
           fitView={false}
           minZoom={0.1}
           maxZoom={2}
@@ -212,6 +226,8 @@ export function Canvas() {
           selectionKeyCode="Shift"
           selectionMode={SelectionMode.Partial}
           selectionOnDrag={false}
+          nodesDraggable={true}
+          nodesSelectable={true}
         >
           <SelectionHandler onSelectionChange={handleSelectionChange} />
           <Background

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAgent } from '@copilotkit/react-core/v2';
-import { X, Send, MessageSquare, Loader2, Copy, Check } from 'lucide-react';
+import { X, Send, MessageSquare, Loader2, Copy, Check, AlertCircle } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -17,11 +16,25 @@ interface CustomCopilotChatProps {
 
 export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
   const { t } = useTranslation();
-  const { messages, isRunning, send } = useAgent();
   const [input, setInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Try to use CopilotKit agent, fallback to local state
+  let agent: any = null;
+  try {
+    // Dynamic import to avoid crash if CopilotKit is not configured
+    agent = require('@copilotkit/react-core/v2').useAgent?.() ?? null;
+  } catch {
+    agent = null;
+  }
+
+  const messages = agent?.messages ?? localMessages;
+  const isRunning = agent?.isRunning ?? false;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,14 +43,44 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+      // Simulate connection check
+      setTimeout(() => {
+        setIsConnecting(false);
+        if (!agent) {
+          setError(t('copilot.chat.runtimeNotAvailable'));
+        }
+      }, 1000);
     }
-  }, [isOpen]);
+  }, [isOpen, agent]);
 
   const handleSubmit = async () => {
     if (!input.trim() || isRunning) return;
     const message = input.trim();
     setInput('');
-    await send(message);
+
+    // Add user message
+    const userMsg: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: Date.now(),
+    };
+    setLocalMessages((prev) => [...prev, userMsg]);
+
+    if (agent?.send) {
+      await agent.send(message);
+    } else {
+      // Demo mode - simulate response
+      setTimeout(() => {
+        const assistantMsg: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: `[${t('copilot.chat.demoMode')}] ${t('copilot.chat.welcomeMessageText')}`,
+          timestamp: Date.now(),
+        };
+        setLocalMessages((prev) => [...prev, assistantMsg]);
+      }, 1000);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -75,50 +118,61 @@ export function CustomCopilotChat({ isOpen, onClose }: CustomCopilotChatProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
+        {isConnecting ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <Loader2 size={32} className="text-accent-400 animate-spin mb-4" />
+            <p className="text-neutral-400 text-sm">{t('copilot.chat.connecting')}</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare size={48} className="text-neutral-700 mb-4" />
             <p className="text-neutral-400 text-sm">
               {t('copilot.chat.welcomeMessageText')}
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-start gap-2">
+                <AlertCircle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-yellow-500">{error}</p>
+              </div>
+            )}
           </div>
-        )}
-        
-        {messages.map((msg: Message) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        ) : (
+          messages.map((msg: Message) => (
             <div
-              className={`max-w-[85%] rounded-xl px-4 py-2.5 ${
-                msg.role === 'user'
-                  ? 'bg-accent-500 text-white'
-                  : 'bg-surface-800 text-neutral-200'
-              }`}
+              key={msg.id}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
-              <div className={`flex items-center gap-2 mt-1.5 ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}>
-                <span className="text-[10px] opacity-60">
-                  {new Date(msg.timestamp).toLocaleTimeString()}
-                </span>
-                {msg.role === 'assistant' && (
-                  <button
-                    onClick={() => handleCopy(msg.id, msg.content)}
-                    className="text-neutral-400 hover:text-neutral-200 transition-colors"
-                  >
-                    {copiedId === msg.id ? (
-                      <Check size={12} />
-                    ) : (
-                      <Copy size={12} />
-                    )}
-                  </button>
-                )}
+              <div
+                className={`max-w-[85%] rounded-xl px-4 py-2.5 ${
+                  msg.role === 'user'
+                    ? 'bg-accent-500 text-white'
+                    : 'bg-surface-800 text-neutral-200'
+                }`}
+              >
+                <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                <div className={`flex items-center gap-2 mt-1.5 ${
+                  msg.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}>
+                  <span className="text-[10px] opacity-60">
+                    {new Date(msg.timestamp).toLocaleTimeString()}
+                  </span>
+                  {msg.role === 'assistant' && (
+                    <button
+                      onClick={() => handleCopy(msg.id, msg.content)}
+                      className="text-neutral-400 hover:text-neutral-200 transition-colors"
+                    >
+                      {copiedId === msg.id ? (
+                        <Check size={12} />
+                      ) : (
+                        <Copy size={12} />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
         
         {isRunning && (
           <div className="flex justify-start">

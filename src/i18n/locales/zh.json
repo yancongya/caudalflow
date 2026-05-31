@@ -74,6 +74,7 @@
   },
   "chat": {
     "askSomething": "问点什么...",
+    "askQuestionToStart": "提出问题开始探索",
     "attachImage": "附加图片",
     "imagesNotSupported": "提供商不支持图片"
   },
@@ -94,7 +95,9 @@
     "closeEsc": "关闭 (Esc)",
     "askAbout": "询问关于\"{{text}}\"",
     "send": "发送",
-    "explore": "探索"
+    "explore": "探索",
+    "branchFromSelection": "从选中文本分支",
+    "branch": "分支"
   },
   "delete": {
     "deleteChat": "删除此对话？",
@@ -124,10 +127,14 @@
       "assistantMessageToolbarReadAloudLabel": "朗读",
       "assistantMessageToolbarRegenerateLabel": "重新生成",
       "userMessageToolbarCopyMessageLabel": "复制",
-      "userMessageToolbarEditMessageLabel": "编辑"
+      "userMessageToolbarEditMessageLabel": "编辑",
+      "connecting": "连接中...",
+      "demoMode": "演示模式",
+      "runtimeNotAvailable": "CopilotKit 运行时不可用。正在以演示模式运行。"
     }
   },
   "common": {
+    "error": "错误：",
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",

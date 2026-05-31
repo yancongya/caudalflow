@@ -5,8 +5,19 @@ import '@copilotkit/react-core/v2/styles.css';
 
 export function CopilotKitProviderShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Force dark mode on html element
-    document.documentElement.classList.add('dark');
+    // Suppress CopilotKit runtime errors when BFF is not running
+    const originalError = console.error;
+    console.error = (...args: any[]) => {
+      const message = args[0]?.toString?.() ?? '';
+      if (message.includes('runtime_info_fetch_failed') || message.includes('502')) {
+        return; // Suppress runtime connection errors
+      }
+      originalError.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalError;
+    };
   }, []);
 
   return (

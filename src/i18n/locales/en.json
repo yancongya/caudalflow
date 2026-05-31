@@ -74,6 +74,7 @@
   },
   "chat": {
     "askSomething": "Ask something...",
+    "askQuestionToStart": "Ask a question to start exploring",
     "attachImage": "Attach image",
     "imagesNotSupported": "Images not supported by provider"
   },
@@ -94,7 +95,9 @@
     "closeEsc": "Close (Esc)",
     "askAbout": "Ask about \"{{text}}\"",
     "send": "Send",
-    "explore": "Explore"
+    "explore": "Explore",
+    "branchFromSelection": "Branch from selection",
+    "branch": "Branch"
   },
   "delete": {
     "deleteChat": "Delete this chat?",
@@ -124,10 +127,14 @@
       "assistantMessageToolbarReadAloudLabel": "Read aloud",
       "assistantMessageToolbarRegenerateLabel": "Regenerate",
       "userMessageToolbarCopyMessageLabel": "Copy",
-      "userMessageToolbarEditMessageLabel": "Edit"
+      "userMessageToolbarEditMessageLabel": "Edit",
+      "connecting": "Connecting...",
+      "demoMode": "Demo Mode",
+      "runtimeNotAvailable": "CopilotKit runtime not available. Running in demo mode."
     }
   },
   "common": {
+    "error": "Error:",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
