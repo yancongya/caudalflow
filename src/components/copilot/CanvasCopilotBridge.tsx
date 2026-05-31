@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useReactFlow } from '@xyflow/react';
 import { useAgent, useFrontendTool } from '@copilotkit/react-core/v2';
 import { useShallow } from 'zustand/react/shallow';
@@ -103,6 +104,7 @@ function LiveMergePlan({ args }: { args: MergePlanArgs }) {
 }
 
 export function CanvasCopilotBridge() {
+  const { t } = useTranslation();
   const { agent } = useAgent();
   const { setCenter } = useReactFlow();
   const lastSyncedStateRef = useRef('');
@@ -312,7 +314,7 @@ export function CanvasCopilotBridge() {
   return (
     <div className="pointer-events-none absolute bottom-3 left-3 z-20 hidden items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950/70 px-3 py-1.5 text-xs text-neutral-400 backdrop-blur md:flex">
       <GitBranch size={13} />
-      <span>{nodeCount} canvas nodes are available to Copilot</span>
+      <span>{t('copilot.nodesAvailable', { count: nodeCount })}</span>
       <Plus size={13} className="text-accent-400" />
     </div>
   );

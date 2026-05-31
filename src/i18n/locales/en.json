@@ -105,6 +105,9 @@
   "chart": {
     "noData": "No chart data provided."
   },
+  "copilot": {
+    "nodesAvailable": "{{count}} canvas nodes are available to Copilot"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

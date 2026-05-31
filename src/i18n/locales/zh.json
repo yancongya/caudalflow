@@ -105,6 +105,9 @@
   "chart": {
     "noData": "未提供图表数据。"
   },
+  "copilot": {
+    "nodesAvailable": "{{count}} 个画布节点可用于 Copilot"
+  },
   "common": {
     "loading": "加载中...",
     "error": "错误",
