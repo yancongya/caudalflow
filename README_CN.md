@@ -3,9 +3,8 @@
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white" />
   <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" />
   <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/LangGraph-0.2+-1C3C3C?style=flat-square&logo=langchain&logoColor=white" />
-  <img src="https://img.shields.io/badge/CopilotKit-1.57+-000000?style=flat-square" />
+  <img src="https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=node.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vercel%20AI%20SDK-4-000000?style=flat-square" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
 </p>
 
@@ -281,11 +280,11 @@ interface LLMProvider {
 | 样式 | Tailwind CSS 4 |
 | 画布 | @xyflow/react 12 |
 | 状态 | Zustand 5 |
-| 副驾驶 | CopilotKit 1.57 |
+| AI | Vercel AI SDK |
+| LLM 提供商 | Anthropic, OpenAI, 自定义（OpenAI 兼容） |
 | 国际化 | react-i18next |
 | 图表 | Recharts 3 |
 | BFF | Hono 4 |
-| 代理 | Python 3.11+, LangGraph, LangChain |
 | Markdown | react-markdown + remark-gfm |
 | 代码高亮 | react-syntax-highlighter (Prism) |
 | 图标 | Lucide React |
