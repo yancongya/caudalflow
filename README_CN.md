@@ -123,34 +123,38 @@ CaudalFlow 为你提供一个无限画布，每个对话都是一个节点。选
 
 ## 快速开始
 
-**前置条件：** Node.js 20+、Python 3.11+、来自 [Anthropic](https://console.anthropic.com/)、[OpenAI](https://platform.openai.com/) 或 [Google AI](https://ai.google.dev/) 的 API 密钥
+### 方式一：Vercel（推荐）
+
+1. Fork 仓库
+2. 导入到 Vercel
+3. 部署
+
+### 方式二：本地开发
 
 ```bash
 git clone https://github.com/yancongya/caudalflow.git
 cd caudalflow
 npm install
-npm run install:agent   # 创建 Python 虚拟环境，安装代理依赖
 ```
 
-创建 `apps/agent/.env`，至少包含一个 LLM 密钥：
-
-```env
-ANTHROPIC_API_KEY=sk-ant-...
-# 和/或
-OPENAI_API_KEY=sk-...
-# 和/或
-GOOGLE_API_KEY=...
-```
-
-启动完整栈：
+启动开发服务器：
 
 ```bash
-npm run dev:copilot
+npm run dev
 ```
 
-这会同时启动 Vite 开发服务器、Hono BFF 和 LangGraph 代理。打开 **http://localhost:5173** — 画布和副驾驶侧边栏已就绪。
+打开 **http://localhost:5173** — 应用已就绪。
 
-> **你的密钥留在你的机器上。** API 密钥存放在本地 `.env` 文件中，通过本地 BFF 传递给提供商 — 不会经过第三方服务器。
+### 方式三：完整栈（带 BFF）
+
+```bash
+npm run dev:ui          # 仅前端
+npm run dev:bff         # BFF 服务器（端口 4000）
+```
+
+在设置面板中配置 API Key — 无需环境变量！
+
+> **你的密钥留在你的机器上。** API 密钥存储在浏览器 localStorage 中，直接发送给提供商。
 
 ---
 
@@ -368,6 +372,29 @@ apps/
 - LangGraph 代理支持
 - 生成式 UI（分支提案、合并计划、图表）
 - 多工作区支持
+
+---
+
+## 部署
+
+### Vercel（推荐）
+
+1. Fork 仓库
+2. 前往 [vercel.com/new](https://vercel.com/new)
+3. 导入你的 fork
+4. 部署
+
+无需环境变量 — API 密钥在应用设置中配置。
+
+### 其他平台
+
+应用可以部署到任何 Node.js 平台：
+
+- Railway
+- Fly.io
+- Render
+- AWS Lambda
+- Cloudflare Workers
 
 ---
 

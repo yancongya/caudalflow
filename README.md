@@ -123,34 +123,38 @@ All toolbar buttons have descriptive tooltips that appear on hover, helping you 
 
 ## Quick Start
 
-**Prerequisites:** Node.js 20+, Python 3.11+, an API key from [Anthropic](https://console.anthropic.com/), [OpenAI](https://platform.openai.com/), or [Google AI](https://ai.google.dev/)
+### Option 1: Vercel (Recommended)
+
+1. Fork the repository
+2. Import to Vercel
+3. Deploy
+
+### Option 2: Local Development
 
 ```bash
 git clone https://github.com/yancongya/caudalflow.git
 cd caudalflow
 npm install
-npm run install:agent   # creates Python venv, installs agent deps
 ```
 
-Create `apps/agent/.env` with at least one LLM key:
-
-```env
-ANTHROPIC_API_KEY=sk-ant-...
-# and/or
-OPENAI_API_KEY=sk-...
-# and/or
-GOOGLE_API_KEY=...
-```
-
-Launch the full stack:
+Start development server:
 
 ```bash
-npm run dev:copilot
+npm run dev
 ```
 
-This starts the Vite dev server, the Hono BFF, and the LangGraph agent concurrently. Open **http://localhost:5173** — the canvas and copilot sidebar are ready.
+Open **http://localhost:5173** — the app is ready.
 
-> **Your keys stay on your machine.** API keys live in your local `.env` file and go through your local BFF to the provider — never a third-party server.
+### Option 3: Full Stack (with BFF)
+
+```bash
+npm run dev:ui          # Frontend only
+npm run dev:bff         # BFF server (port 4000)
+```
+
+Configure API key in Settings panel — no environment variables needed!
+
+> **Your keys stay on your machine.** API keys are stored in browser localStorage and sent directly to the provider.
 
 ---
 
@@ -368,6 +372,29 @@ See the [step-by-step guide in CONTRIBUTING.md](CONTRIBUTING.md#adding-a-new-llm
 - LangGraph agent support
 - Generative UI (branch proposals, merge plans, charts)
 - Multi-workspace support
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Fork the repository
+2. Go to [vercel.com/new](https://vercel.com/new)
+3. Import your fork
+4. Deploy
+
+No environment variables needed — API keys are configured in the app settings.
+
+### Other Platforms
+
+The app can be deployed to any Node.js platform:
+
+- Railway
+- Fly.io
+- Render
+- AWS Lambda
+- Cloudflare Workers
 
 ---
 
