@@ -429,11 +429,11 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
     );
   }
 
-  // Collapsed view - small card
+  // Collapsed view - small rectangular card
   if (collapsed) {
     return (
       <div
-        className={`relative flex items-center gap-2 bg-surface-900 border rounded-lg shadow-lg shadow-black/30 px-3 py-2 cursor-grab active:cursor-grabbing ${
+        className={`relative flex flex-col bg-surface-900 border rounded-lg shadow-lg shadow-black/30 w-[140px] cursor-grab active:cursor-grabbing ${
           selected ? 'border-accent-500/60' : 'border-border'
         } transition-colors`}
       >
@@ -449,45 +449,56 @@ export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
           className="!bg-accent-400 !border-none !w-2 !h-2"
           id="right"
         />
-        
-        <button
-          onClick={handleToggleCollapse}
-          className="nodrag text-text-secondary hover:text-text-primary transition-colors"
-          title={t('node.expand')}
-        >
-          <ChevronRight size={12} />
-        </button>
-        
-        <div className="flex-1 min-w-0 flex items-center gap-1.5">
-          {color && (
-            <div
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: color }}
-            />
-          )}
-          <span className="text-[11px] font-medium text-text-primary truncate">
-            {topic}
-          </span>
+
+        {/* Header with color indicator */}
+        <div className="flex items-center justify-between px-2 py-1.5 border-b border-border bg-surface-800 rounded-t-lg">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {color && (
+              <div
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: color }}
+              />
+            )}
+            <span className="text-[10px] font-medium text-text-primary truncate">
+              {topic.length > 12 ? topic.slice(0, 12) + '...' : topic}
+            </span>
+          </div>
+          <div className="flex items-center gap-0.5">
+            {messageCount > 0 && (
+              <span className="text-[8px] text-text-muted bg-surface-700 rounded-full px-1 leading-none">
+                {messageCount}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-2 py-1.5 flex flex-col gap-1">
           {label && (
             <span className="text-[9px] text-text-muted truncate">
-              ({label})
+              {label}
             </span>
           )}
+          
+          {/* Action buttons */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleToggleCollapse}
+              className="nodrag text-text-secondary hover:text-text-primary transition-colors"
+              title={t('node.expand')}
+            >
+              <ChevronRight size={10} />
+            </button>
+            <button
+              onClick={handleClose}
+              className="nodrag text-text-muted hover:text-red-400 transition-colors"
+              title={t('node.close')}
+            >
+              <X size={10} />
+            </button>
+          </div>
         </div>
-        
-        {messageCount > 0 && (
-          <span className="text-[9px] text-text-muted bg-surface-700 rounded-full px-1.5 py-0.5 leading-none">
-            {messageCount}
-          </span>
-        )}
-        
-        <button
-          onClick={handleClose}
-          className="nodrag text-text-muted hover:text-red-400 transition-colors"
-          title={t('node.close')}
-        >
-          <X size={12} />
-        </button>
+
         {showDeleteConfirmation && (
           <ChatNodeDeleteConfirmation
             topic={topic}
