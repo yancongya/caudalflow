@@ -26,11 +26,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic-api-key",
-    "OPENAI_API_KEY": "@openai-api-key",
-    "GEMINI_API_KEY": "@gemini-api-key",
-    "AGENT_RUNTIME": "anthropic"
-  }
+  ]
 }

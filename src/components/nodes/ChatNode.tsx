@@ -6,7 +6,6 @@ import { Maximize2, X, ChevronRight } from 'lucide-react';
 import type { ChatNode } from '../../types/flow';
 import { useChatStore } from '../../stores/chatStore';
 import { useFlowStore } from '../../stores/flowStore';
-import { useSettingsStore } from '../../stores/settingsStore';
 import { useNodeCopilotChat } from '../../hooks/useNodeCopilotChat';
 import { streamChat } from '../../services/llm';
 import { calculateBranchPosition } from '../../utils/nodeLayout';
@@ -28,7 +27,6 @@ const PALETTE_COLORS = [
 export function ChatNodeComponent({ id, data, selected }: NodeProps<ChatNode>) {
   const { t } = useTranslation();
   const { topic, collapsed, minimized, maximized, parentNodeId, branchText, parentNodeIds, mergeAction, color, label } = data;
-  const selectMode = useSettingsStore((s) => s.selectMode);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const { sendMessage, cancelStream } = useNodeCopilotChat(id, topic, parentNodeId, branchText, parentNodeIds as string[] | undefined, mergeAction as string | undefined);

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Send, MessageSquare, Loader2, Copy, Check, AlertCircle } from 'lucide-react';
+import { X, Send, MessageSquare, Loader2, Copy, Check } from 'lucide-react';
 import { useAgent } from '../../services/agent';
 
 interface CustomCopilotChatProps {

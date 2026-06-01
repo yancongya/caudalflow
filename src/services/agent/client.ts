@@ -1,4 +1,4 @@
-import type { AgentMessage, CanvasState, AgentEvent } from './types';
+import type { CanvasState, AgentEvent } from './types';
 
 const AGENT_API_URL = '/api/agent';
 

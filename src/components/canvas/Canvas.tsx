@@ -119,7 +119,7 @@ export function Canvas() {
   );
 
   const handleConnect = useCallback(
-    (connection: { source: string; target: string; sourceHandle?: string; targetHandle?: string }) => {
+    (connection: { source: string; target: string | null; sourceHandle?: string | null; targetHandle?: string | null }) => {
       const flowStore = useFlowStore.getState();
       flowStore.addEdge(connection.source, connection.target, '');
     },

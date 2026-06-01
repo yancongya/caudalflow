@@ -5,41 +5,30 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
-  Map,
   Settings,
   Plus,
   HelpCircle,
   Network,
-  ChevronDownSquare,
-  ChevronUpSquare,
   Sun,
   Moon,
   Monitor
 } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { useFlowStore } from '../../stores/flowStore';
-import { useChatStore } from '../../stores/chatStore';
 import { HelpGuidePanel } from '../ui/HelpGuide';
 import { Tooltip } from '../ui/Tooltip';
 import { calculateAutoLayoutPositions } from '../../utils/nodeLayout';
+import { useFlowStore } from '../../stores/flowStore';
 
 interface CanvasControlsProps {}
 
 export function CanvasControls({}: CanvasControlsProps) {
   const { t } = useTranslation();
   const { zoomIn, zoomOut, fitView, getViewport } = useReactFlow();
-  const toggleMinimap = useSettingsStore((s) => s.toggleMinimap);
-  const showMinimap = useSettingsStore((s) => s.showMinimap);
   const toggleSettings = useSettingsStore((s) => s.toggleSettings);
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
   const [showHelp, setShowHelp] = useState(false);
   const arrangeTimerRef = useRef<number | null>(null);
-  const toggleCollapseSmart = useFlowStore((s) => s.toggleCollapseSmart);
-
-  const nodes = useFlowStore((s) => s.nodes);
-  const collapsedCount = nodes.filter((n) => n.data?.collapsed).length;
-  const mostlyCollapsed = collapsedCount > nodes.length / 2;
 
   useEffect(() => {
     return () => {
@@ -59,7 +48,7 @@ export function CanvasControls({}: CanvasControlsProps) {
       topic: t('canvas.newChat'),
       collapsed: false,
     });
-    useChatStore.getState().initConversation(nodeId);
+    useFlowStore.getState().updateNodeData(nodeId, { collapsed: false });
   };
 
   const handleAutoArrange = () => {
@@ -107,7 +96,7 @@ export function CanvasControls({}: CanvasControlsProps) {
   const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
 
   const btnClass =
-    'p-2 rounded-lg bg-surface-900 border border-border text-text-secondary hover:text-text-primary hover:bg-surface-800 transition-colors';
+    'p-2 rounded-lg bg-surface-900 border border-neutral-700/50 text-neutral-400 hover:text-neutral-200 hover:bg-surface-800 transition-colors';
 
   return (
     <>
