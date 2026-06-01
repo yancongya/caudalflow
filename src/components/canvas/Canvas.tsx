@@ -121,7 +121,9 @@ export function Canvas() {
   const handleConnect = useCallback(
     (connection: { source: string; target: string | null; sourceHandle?: string | null; targetHandle?: string | null }) => {
       const flowStore = useFlowStore.getState();
-      flowStore.addEdge(connection.source, connection.target, '');
+      if (connection.target) {
+        flowStore.addEdge(connection.source, connection.target, '');
+      }
     },
     []
   );
@@ -300,7 +302,6 @@ export function Canvas() {
           panOnDrag={spacePressed}
           panOnScroll={spacePressed}
           nodesDraggable={!spacePressed}
-          nodesSelectable={true}
           elementsSelectable={true}
         >
           <SelectionHandler onSelectionChange={handleSelectionChange} />
