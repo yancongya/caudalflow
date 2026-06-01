@@ -24,18 +24,6 @@ export function SettingsPanel() {
   const [connectionResult, setConnectionResult] = useState<{ success: boolean; message: string } | null>(null);
   const [models, setModels] = useState<{ id: string; name: string }[]>([]);
 
-  if (!showSettings) return null;
-
-  const labelClass = 'block text-xs font-medium mb-1';
-  const inputClass =
-    'w-full bg-surface-800 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-accent-500/50 focus:outline-none transition-colors';
-
-  const themeOptions = [
-    { value: 'light' as const, icon: Sun, label: t('settings.themeLight') },
-    { value: 'dark' as const, icon: Moon, label: t('settings.themeDark') },
-    { value: 'system' as const, icon: Monitor, label: t('settings.themeSystem') },
-  ];
-
   const handleFetchModels = useCallback(async () => {
     if (!config.endpoint || !config.apiKey) return;
     setLoadingModels(true);
@@ -58,6 +46,18 @@ export function SettingsPanel() {
       setTestingConnection(false);
     }
   }, [config.endpoint, config.apiKey]);
+
+  if (!showSettings) return null;
+
+  const labelClass = 'block text-xs font-medium mb-1';
+  const inputClass =
+    'w-full bg-surface-800 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-accent-500/50 focus:outline-none transition-colors';
+
+  const themeOptions = [
+    { value: 'light' as const, icon: Sun, label: t('settings.themeLight') },
+    { value: 'dark' as const, icon: Moon, label: t('settings.themeDark') },
+    { value: 'system' as const, icon: Monitor, label: t('settings.themeSystem') },
+  ];
 
   return (
     <div className="absolute top-0 right-0 z-50 h-full w-80 bg-surface-900 border-l border-border shadow-2xl shadow-black/50 flex flex-col">
